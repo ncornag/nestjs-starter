@@ -20,7 +20,7 @@ async function bootstrap() {
     AppModule,
     new FastifyAdapter({
       logger: {
-        level: process.env.LOG_LEVEL || 'debug',
+        level: process.env.LOG_LEVEL || 'info',
         transport: {
           target: '@mgcrea/pino-pretty-compact',
           options: {

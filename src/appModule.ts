@@ -1,14 +1,16 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { MongoClient, Db } from 'mongodb';
 import { ProjectModule } from './modules/project/projectModule';
+import { DatabaseModule } from './databaseModule';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true
     }),
-    ProjectModule
-  ]
+    ProjectModule,
+    DatabaseModule
+  ],
+  exports: [DatabaseModule]
 })
 export class AppModule {}

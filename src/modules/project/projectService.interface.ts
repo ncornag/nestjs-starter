@@ -9,8 +9,9 @@ export const CreateProjectSchema = Type.Omit(ProjectModelSchema, ['id'], {
   additionalProperties: false
 });
 export type CreateProject = Static<typeof CreateProjectSchema>;
+
 export const UpdateProjectSchema = Type.Partial(
-  Type.Omit(ProjectModelSchema, ['id']),
+  Type.Omit(ProjectModelSchema, ['id', 'key']),
   {
     additionalProperties: false
   }

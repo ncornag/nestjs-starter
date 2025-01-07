@@ -1,5 +1,4 @@
 import { Body, Controller, Inject, Param, Res } from '@nestjs/common';
-import { Type, type Static } from '@sinclair/typebox';
 import { HttpEndpoint } from 'nestjs-typebox';
 import {
   PROJECT_SERVICE_TOKEN,
@@ -30,7 +29,7 @@ export class ProjectController {
   })
   async create(@Body() data: CreateProject, @Res() res): Promise<string> {
     const id = await this.service.create(data);
-    return res.status(201).send(id);
+    return res.status(201).send({ id });
   }
 
   // GET
@@ -49,7 +48,7 @@ export class ProjectController {
     }
   })
   async get(@Param('id') id: ID): Promise<ProjectModel> {
-    return this.service.findById(id);
+    return await this.service.findById(id);
   }
 
   // UPDATE
@@ -73,11 +72,9 @@ export class ProjectController {
   })
   async update(
     @Param('id') id: ID,
-    @Body() data: UpdateProject,
-    @Res() res
+    @Body() data: UpdateProject
   ): Promise<ProjectModel> {
-    await this.service.update(id, data);
-    return res.status(204);
+    return await this.service.update(id, data);
   }
 
   // DELETE
@@ -96,6 +93,6 @@ export class ProjectController {
   })
   async delete(@Param('id') id: ID, @Res() res): Promise<void> {
     await this.service.delete(id);
-    return res.status(204);
+    return res.status(204).send();
   }
 }
