@@ -1,4 +1,5 @@
 import { NestFactory } from '@nestjs/core';
+import { Logger } from '@nestjs/common';
 import {
   FastifyAdapter,
   NestFastifyApplication
@@ -6,6 +7,8 @@ import {
 import { AppModule } from './appModule';
 import { configureNestJsTypebox } from 'nestjs-typebox';
 import fastifyRequestLogger from '@mgcrea/fastify-request-logger';
+import { ConfigService } from '@nestjs/config';
+import * as dotenv from 'dotenv';
 
 configureNestJsTypebox({
   patchSwagger: true,
@@ -17,7 +20,7 @@ async function bootstrap() {
     AppModule,
     new FastifyAdapter({
       logger: {
-        level: process.env.LOG_LEVEL || 'info',
+        level: process.env.LOG_LEVEL || 'debug',
         transport: {
           target: '@mgcrea/pino-pretty-compact',
           options: {
@@ -31,7 +34,15 @@ async function bootstrap() {
     })
   );
   await app.register(fastifyRequestLogger);
-  await app.listen(3000);
-  console.log(`Application is running on: ${await app.getUrl()}`);
+
+  const configService = app.get(ConfigService);
+  const API_HOST = configService.get<string>('API_HOST', '0.0.0.0');
+  const API_PORT = configService.get<number>('API_PORT', 3000);
+  await app.listen(API_PORT, API_HOST);
+  //const logger = new Logger();
+  Logger.log(
+    `This application is runnning on: ${await app.getUrl()}`,
+    'Bootstrap'
+  );
 }
 bootstrap();
