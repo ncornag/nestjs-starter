@@ -1,4 +1,4 @@
-import * as dotenv from 'dotenv';
+import 'dotenv/config';
 import { NestFactory } from '@nestjs/core';
 import { Logger } from 'nestjs-pino';
 import {
@@ -46,7 +46,7 @@ async function bootstrap() {
   await app.listen(API_PORT, API_HOST);
 
   appLogger.log(
-    `${yellow('APP:')} [${configService.get<string>('APP_NAME')}] ${yellow('ENV:')} [${configService.get<string>('NODE_ENV')}]`
+    `${yellow('APP:')} [${configService.get<string>('APP_NAME')}] ${yellow('ENV:')} [${configService.get<string>('NODE_ENV')}] ${yellow('LOG:')} [${configService.get<string>('LOG_LEVEL')}]`
   );
 }
 bootstrap();
