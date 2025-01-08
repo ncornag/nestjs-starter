@@ -4,6 +4,7 @@ import {
   Injectable,
   NotFoundException
 } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import { nanoid } from 'nanoid';
 import { ProjectModel } from './projectModel';
 import {
@@ -16,12 +17,14 @@ import {
   PROJECT_REPOSITORY_TOKEN
 } from './projectRepository.interface';
 import { ID } from 'src/appModule.interfaces';
+import { PinoLogger } from 'nestjs-pino';
 
 @Injectable()
 export class ProjectService implements IProjectService {
   constructor(
     @Inject(PROJECT_REPOSITORY_TOKEN)
-    private readonly repository: IProjectRepository
+    private readonly repository: IProjectRepository,
+    private readonly logger: PinoLogger
   ) {}
 
   // CREATE
