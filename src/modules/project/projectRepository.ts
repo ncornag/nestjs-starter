@@ -19,7 +19,7 @@ export class ProjectRepository implements IProjectRepository {
   private col: Collection<DbEntity>;
 
   constructor(
-    @Inject('DATABASE_CONNECTION')
+    @Inject('DB')
     private mongo: MongoClient
   ) {
     this.col = this.mongo.db().collection<DbEntity>('project');
