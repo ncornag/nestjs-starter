@@ -1,8 +1,6 @@
+import * as dotenv from 'dotenv';
 import { NestFactory } from '@nestjs/core';
-//import { Logger } from '@nestjs/common';
 import { Logger } from 'nestjs-pino';
-import { Logger as l } from '@nestjs/common';
-
 import {
   FastifyAdapter,
   NestFastifyApplication
@@ -11,7 +9,7 @@ import { AppModule, loggerConfig } from './appModule';
 import { configureNestJsTypebox } from 'nestjs-typebox';
 import fastifyRequestLogger from '@mgcrea/fastify-request-logger';
 import { ConfigService } from '@nestjs/config';
-import * as dotenv from 'dotenv';
+import { yellow } from 'kolorist';
 
 import { customAlphabet } from 'nanoid';
 const nanoid = customAlphabet(
@@ -47,6 +45,8 @@ async function bootstrap() {
   const API_PORT = configService.get<number>('API_PORT', 3000);
   await app.listen(API_PORT, API_HOST);
 
-  appLogger.log(`This application is runnning on: ${await app.getUrl()}`);
+  appLogger.log(
+    `${yellow('APP:')} [${configService.get<string>('APP_NAME')}] ${yellow('ENV:')} [${configService.get<string>('NODE_ENV')}]`
+  );
 }
 bootstrap();
