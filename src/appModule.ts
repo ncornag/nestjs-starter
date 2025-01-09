@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { ProjectModule } from './modules/project/projectModule';
 import { DatabaseModule } from './infrastructure/databaseModule';
 import { LoggerModule } from 'nestjs-pino';
+import { RequestContextModule } from 'nestjs-request-context';
 
 export const loggerConfig = {
   level: process.env.LOG_LEVEL || 'info',
@@ -25,8 +26,9 @@ export const loggerConfig = {
       useExisting: true,
       pinoHttp: loggerConfig
     }),
-    ProjectModule,
-    DatabaseModule
+    DatabaseModule,
+    RequestContextModule,
+    ProjectModule
   ],
   exports: [DatabaseModule]
 })

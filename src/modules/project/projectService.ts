@@ -18,6 +18,8 @@ import {
 } from './projectRepository.interface';
 import { ID } from 'src/appModule.interfaces';
 import { PinoLogger } from 'nestjs-pino';
+import { RequestContext } from 'nestjs-request-context';
+import { IncomingMessage } from 'http';
 
 @Injectable()
 export class ProjectService implements IProjectService {
@@ -26,6 +28,11 @@ export class ProjectService implements IProjectService {
     private readonly repository: IProjectRepository,
     private readonly logger: PinoLogger
   ) {}
+
+  getRequestId() {
+    const req = RequestContext.currentContext.req as IncomingMessage;
+    return req.id;
+  }
 
   // CREATE
   async create(data: CreateProject) {
