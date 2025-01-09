@@ -19,6 +19,15 @@ const nanoid = customAlphabet(
   5
 );
 
+// Patch Bigint.toJSON
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+interface BigInt {
+  toJSON: () => string;
+}
+(BigInt.prototype as any).toJSON = function () {
+  return this.toString();
+};
+
 configureNestJsTypebox({
   patchSwagger: true,
   setFormats: true
