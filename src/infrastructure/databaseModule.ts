@@ -1,19 +1,17 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongoClient } from 'mongodb';
 import { green, yellow } from 'kolorist';
 import { PinoLogger } from 'nestjs-pino';
+import { EnvService } from './env/envService';
+import { EnvModule } from './env/envModule';
 
 @Module({
-  imports: [ConfigModule],
+  imports: [EnvModule],
   providers: [
     {
       provide: 'DB',
-      inject: [ConfigService, PinoLogger],
-      useFactory: async (
-        config: ConfigService,
-        logger
-      ): Promise<MongoClient> => {
+      inject: [EnvService, PinoLogger],
+      useFactory: async (config: EnvService, logger): Promise<MongoClient> => {
         try {
           const url = config.get('MONGO_URL');
           const client = await MongoClient.connect(url, {});
