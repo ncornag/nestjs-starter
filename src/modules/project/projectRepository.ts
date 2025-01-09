@@ -6,26 +6,25 @@ import {
 } from '@nestjs/common';
 import { ProjectModel } from './projectModel';
 import { IProjectRepository } from './projectRepository.interface';
-import { Collection, Db, MongoClient } from 'mongodb';
+import { Collection } from 'mongodb';
 import { Err, Ok, Result } from 'ts-results-es';
 import { ID } from 'src/appModule.interfaces';
-
-type DbEntity = Omit<ProjectModel, 'id'> & {
-  _id?: ProjectModel['id'];
-};
+import { DB, type DbEntity } from 'src/infrastructure/databaseModule';
 
 @Injectable()
 export class ProjectRepository implements IProjectRepository {
-  private col: Collection<DbEntity>;
+  private col: Collection<DbEntity<ProjectModel>>;
 
   constructor(
     @Inject('DB')
-    private mongo: MongoClient
+    private db: DB
   ) {
-    this.col = this.mongo.db().collection<DbEntity>('project');
+    this.col = this.db.getDb().collection<DbEntity<ProjectModel>>('project');
   }
 
-  private toEntity = (dbEntity: DbEntity): ProjectModel | undefined => {
+  private toEntity = (
+    dbEntity: DbEntity<ProjectModel>
+  ): ProjectModel | undefined => {
     if (dbEntity == undefined) return undefined;
     const { _id, ...remainder } = dbEntity;
     return {
@@ -33,7 +32,10 @@ export class ProjectRepository implements IProjectRepository {
       ...remainder
     };
   };
-  private toDbEntity = ({ id, ...remainder }: ProjectModel): DbEntity => ({
+  private toDbEntity = ({
+    id,
+    ...remainder
+  }: ProjectModel): DbEntity<ProjectModel> => ({
     _id: id,
     ...remainder
   });
