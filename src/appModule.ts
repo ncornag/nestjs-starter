@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ProjectModule } from './modules/project/projectModule';
-import { DatabaseModule } from './databaseModule';
+import { DatabaseModule } from './infrastructure/databaseModule';
 import { LoggerModule } from 'nestjs-pino';
 
 export const loggerConfig = {
@@ -18,7 +18,9 @@ export const loggerConfig = {
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({
+      isGlobal: true
+    }),
     LoggerModule.forRoot({
       useExisting: true,
       pinoHttp: loggerConfig

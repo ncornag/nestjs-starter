@@ -4,7 +4,7 @@ import { ProjectService } from './projectService';
 import { PROJECT_SERVICE_TOKEN } from './projectService.interface';
 import { ProjectRepository } from './projectRepository';
 import { PROJECT_REPOSITORY_TOKEN } from './projectRepository.interface';
-import { DatabaseModule } from 'src/databaseModule';
+import { DatabaseModule } from 'src/infrastructure/databaseModule';
 
 @Module({
   imports: [DatabaseModule],
