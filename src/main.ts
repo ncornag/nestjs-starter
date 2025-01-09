@@ -13,6 +13,7 @@ import { yellow } from 'kolorist';
 import helmet from 'helmet';
 
 import { customAlphabet } from 'nanoid';
+import { SwaggerRunner } from './shared/swagger/swagger-runner';
 const nanoid = customAlphabet(
   'useandom-26T198340PX75pxJACKVERYMINDBUSHWOLFGQZbfghjklqvwyzrict',
   5
@@ -37,6 +38,7 @@ async function bootstrap() {
       bufferLogs: true
     }
   );
+  app.setGlobalPrefix('api');
   await app.register(fastifyRequestLogger);
   const configService = app.get(ConfigService);
   const appLogger = app.get(Logger);
@@ -49,6 +51,8 @@ async function bootstrap() {
   );
   app.use(helmet.hidePoweredBy());
   app.enableCors();
+  new SwaggerRunner(app).run();
+
   const API_HOST = configService.get<string>('API_HOST', '0.0.0.0');
   const API_PORT = configService.get<number>('API_PORT', 3000);
   await app.listen(API_PORT, API_HOST);
