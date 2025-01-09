@@ -10,6 +10,7 @@ import { configureNestJsTypebox } from 'nestjs-typebox';
 import fastifyRequestLogger from '@mgcrea/fastify-request-logger';
 import { ConfigService } from '@nestjs/config';
 import { yellow } from 'kolorist';
+import helmet from 'helmet';
 
 import { customAlphabet } from 'nanoid';
 const nanoid = customAlphabet(
@@ -41,6 +42,13 @@ async function bootstrap() {
   const appLogger = app.get(Logger);
   app.useLogger(appLogger);
 
+  app.use(
+    helmet({
+      xPoweredBy: false
+    })
+  );
+  app.use(helmet.hidePoweredBy());
+  app.enableCors();
   const API_HOST = configService.get<string>('API_HOST', '0.0.0.0');
   const API_PORT = configService.get<number>('API_PORT', 3000);
   await app.listen(API_PORT, API_HOST);
