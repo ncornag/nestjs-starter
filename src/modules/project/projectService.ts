@@ -8,9 +8,9 @@ import { Logger } from '@nestjs/common';
 import { nanoid } from 'nanoid';
 import { ProjectModel } from './projectModel';
 import {
-  CreateProject,
+  CreateProjectBody,
   IProjectService,
-  UpdateProject
+  UpdateProjectBody
 } from './projectService.interface';
 import {
   IProjectRepository,
@@ -35,7 +35,7 @@ export class ProjectService implements IProjectService {
   }
 
   // CREATE
-  async create(data: CreateProject) {
+  async create(data: CreateProjectBody) {
     const result = await this.repository.findByKey(data.key);
     if (result.isOk() && result.value)
       throw new BadRequestException('Project key already exists');
@@ -53,7 +53,7 @@ export class ProjectService implements IProjectService {
   }
 
   // UPDATE
-  async update(id: ID, data: UpdateProject): Promise<ProjectModel> {
+  async update(id: ID, data: UpdateProjectBody): Promise<ProjectModel> {
     const result = await this.repository.update(id, data);
     if (result.isErr()) throw result.error;
     return result.value;

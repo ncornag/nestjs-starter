@@ -1,97 +1,128 @@
-import { Body, Controller, Inject, Param, Res } from '@nestjs/common';
-import { HttpEndpoint } from 'nestjs-typebox';
+import {
+  Get,
+  Delete,
+  Patch,
+  Post,
+  Controller,
+  Inject,
+  Res
+} from '@nestjs/common';
+import { HttpEndpoint, Validate } from 'nestjs-typebox';
 import {
   PROJECT_SERVICE_TOKEN,
   IProjectService,
-  CreateProjectSchema,
-  CreateProject,
-  UpdateProjectSchema,
-  UpdateProject
+  CreateProjectBodySchema,
+  CreateProjectBody,
+  UpdateProjectBodySchema,
+  UpdateProjectBody
 } from './projectService.interface';
 import { ProjectModel, ProjectModelSchema } from './projectModel';
-import { idSchema, ID } from 'src/appModule.interfaces';
+import {
+  idSchema,
+  ID,
+  projectIdSchema,
+  ProjectID
+} from 'src/appModule.interfaces';
 
 // CONTROLLER
-@Controller({ path: 'project' })
+@Controller(':projectId/projects')
 export class ProjectController {
   constructor(
     @Inject(PROJECT_SERVICE_TOKEN)
     private readonly service: IProjectService
   ) {}
 
-  // CREATE
-  @HttpEndpoint({
-    method: 'POST',
-    validate: {
-      response: idSchema,
-      request: [{ type: 'body', schema: CreateProjectSchema }]
-    }
+  @Post()
+  @Validate({
+    response: idSchema,
+    request: [
+      {
+        name: 'projectId',
+        type: 'param',
+        schema: projectIdSchema
+      },
+      {
+        type: 'body',
+        schema: CreateProjectBodySchema
+      }
+    ]
   })
-  async create(@Body() data: CreateProject, @Res() res): Promise<string> {
+  async create(
+    projectId: ProjectID,
+    data: CreateProjectBody,
+    @Res() res
+  ): Promise<string> {
     const id = await this.service.create(data);
     return res.status(201).send({ id });
   }
 
   // GET
-  @HttpEndpoint({
-    method: 'GET',
-    path: ':id',
-    validate: {
-      response: ProjectModelSchema,
-      request: [
-        {
-          name: 'id',
-          type: 'param',
-          schema: idSchema
-        }
-      ]
-    }
+  @Get(':id')
+  @Validate({
+    response: ProjectModelSchema,
+    request: [
+      {
+        name: 'projectId',
+        type: 'param',
+        schema: projectIdSchema
+      },
+      {
+        name: 'id',
+        type: 'param',
+        schema: idSchema
+      }
+    ]
   })
-  async get(@Param('id') id: ID): Promise<ProjectModel> {
+  async get(projectId: ProjectID, id: ID): Promise<ProjectModel> {
     return await this.service.findById(id);
   }
 
   // UPDATE
-  @HttpEndpoint({
-    method: 'PATCH',
-    path: ':id',
-    validate: {
-      response: ProjectModelSchema,
-      request: [
-        {
-          name: 'id',
-          type: 'param',
-          schema: idSchema
-        },
-        {
-          type: 'body',
-          schema: UpdateProjectSchema
-        }
-      ]
-    }
+  @Patch(':id')
+  @Validate({
+    response: ProjectModelSchema,
+    request: [
+      {
+        name: 'projectId',
+        type: 'param',
+        schema: projectIdSchema
+      },
+      {
+        name: 'id',
+        type: 'param',
+        schema: idSchema
+      },
+      {
+        type: 'body',
+        schema: UpdateProjectBodySchema
+      }
+    ]
   })
   async update(
-    @Param('id') id: ID,
-    @Body() data: UpdateProject
+    projectId: ProjectID,
+    id: ID,
+    data: UpdateProjectBody
   ): Promise<ProjectModel> {
     return await this.service.update(id, data);
   }
 
   // DELETE
-  @HttpEndpoint({
-    method: 'DELETE',
-    path: ':id',
-    validate: {
-      request: [
-        {
-          name: 'id',
-          type: 'param',
-          schema: idSchema
-        }
-      ]
-    }
+  @Delete(':id')
+  @Validate({
+    request: [
+      {
+        name: 'projectId',
+        type: 'param',
+        schema: projectIdSchema
+      },
+      {
+        name: 'id',
+        type: 'param',
+        schema: idSchema
+      }
+    ]
   })
-  async delete(@Param('id') id: ID, @Res() res): Promise<void> {
+  async delete(projectId: ProjectID, id: ID, @Res() res): Promise<void> {
     await this.service.delete(id);
     return res.status(204).send();
   }

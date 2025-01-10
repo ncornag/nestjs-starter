@@ -4,6 +4,8 @@ import { Option, Result } from 'ts-results-es';
 // ID TYPES
 export const idSchema = Type.String();
 export type ID = Static<typeof idSchema>;
+export const projectIdSchema = Type.String();
+export type ProjectID = Static<typeof projectIdSchema>;
 
 // GENERIC SERVICE
 export interface IService<T, C, U> {

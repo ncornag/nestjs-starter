@@ -36,7 +36,8 @@ configureNestJsTypebox({
 const FastifyModule = new FastifyAdapter({
   logger: loggerConfig,
   disableRequestLogging: true,
-  genReqId: (req) => (req.headers['request-id'] as string) ?? nanoid(5)
+  genReqId: (req) => (req.headers['request-id'] as string) ?? nanoid(5),
+  requestIdHeader: 'request-id'
 });
 
 async function bootstrap() {
