@@ -4,7 +4,6 @@ import { ProjectModule } from './modules/project/projectModule';
 import { DatabaseModule } from './infrastructure/databaseModule';
 import { LoggerModule } from 'nestjs-pino';
 import { RequestContextModule } from 'nestjs-request-context';
-import { SetMetadata } from '@nestjs/common';
 import { AuthModule } from './modules/auth/authModule';
 
 export const loggerConfig = {

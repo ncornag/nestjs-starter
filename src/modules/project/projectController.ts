@@ -8,7 +8,7 @@ import {
   Res,
   UseGuards
 } from '@nestjs/common';
-import { HttpEndpoint, Validate } from 'nestjs-typebox';
+import { Validate } from 'nestjs-typebox';
 import {
   PROJECT_SERVICE_TOKEN,
   IProjectService,
@@ -24,7 +24,7 @@ import {
   projectIdSchema,
   ProjectID
 } from 'src/appModule.interfaces';
-import { AuthGuard } from 'src/modules/auth/authGuard';
+import { AllowScopes } from 'src/modules/auth/authGuard';
 
 // CONTROLLER
 @Controller(':projectId/projects')
@@ -34,7 +34,7 @@ export class ProjectController {
     private readonly service: IProjectService
   ) {}
 
-  @UseGuards(AuthGuard('catalog:write'))
+  @UseGuards(AllowScopes('catalog:write'))
   @Post()
   @Validate({
     response: idSchema,

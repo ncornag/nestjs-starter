@@ -12,7 +12,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 import { Reflector } from '@nestjs/core';
 
-export const AuthGuard = (scopes: string[] | string): Type<CanActivate> => {
+export const AllowScopes = (scopes: string[] | string): Type<CanActivate> => {
   @Injectable()
   class AuthGuardMixin implements CanActivate {
     private publicKey: string;

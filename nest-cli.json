@@ -4,6 +4,9 @@
   "sourceRoot": "src",
   "compilerOptions": {
     "deleteOutDir": false,
-    "assets": [{ "include": "../public.pem", "outDir": "./dist/public.pem" }]
+    "assets": [
+      { "include": "../public.pem", "outDir": "./dist/public.pem" },
+      { "include": "../private.key", "outDir": "./dist/private.key" }
+    ]
   }
 }
