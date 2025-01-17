@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { Validate } from 'nestjs-typebox';
 import {
-  PROJECT_SERVICE_TOKEN,
+  _IProjectService,
   IProjectService,
   CreateProjectBodySchema,
   CreateProjectBody,
@@ -30,7 +30,7 @@ import { AllowScopes } from 'src/modules/auth/authGuard';
 @Controller(':projectId/projects')
 export class ProjectController {
   constructor(
-    @Inject(PROJECT_SERVICE_TOKEN)
+    @Inject(_IProjectService)
     private readonly service: IProjectService
   ) {}
 

@@ -1,10 +1,12 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ProjectModule } from './modules/project/projectModule';
+import { UserModule } from './modules/user/userModule';
 import { DatabaseModule } from './infrastructure/databaseModule';
 import { LoggerModule } from 'nestjs-pino';
 import { RequestContextModule } from 'nestjs-request-context';
 import { AuthModule } from './modules/auth/authModule';
+import { OrgModule } from './modules/org/orgModule';
 
 export const loggerConfig = {
   level: process.env.LOG_LEVEL || 'info',
@@ -15,6 +17,10 @@ export const loggerConfig = {
       colorize: true,
       ignore: 'pid,hostname,plugin'
     }
+  },
+  redact: {
+    paths: ['password', '*.password'],
+    censor: '***'
   }
 };
 
@@ -30,6 +36,8 @@ export const loggerConfig = {
     DatabaseModule,
     RequestContextModule,
     AuthModule,
+    UserModule,
+    OrgModule,
     ProjectModule
   ],
   exports: [DatabaseModule]

@@ -1,28 +1,23 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { ProjectModel } from './projectModel';
-import {
-  IProjectRepository,
-  _IProjectRepository
-} from './projectRepository.interface';
+import { OrgModel } from './orgModel';
+import { IOrgRepository, _IOrgRepository } from './orgRepository.interface';
 import { Collection } from 'mongodb';
 import { Err, Ok, Result } from 'ts-results-es';
 import { ID } from 'src/appModule.interfaces';
 import { DB, type DbEntity } from 'src/infrastructure/databaseModule';
 
 @Injectable()
-export class ProjectRepository implements IProjectRepository {
-  private col: Collection<DbEntity<ProjectModel>>;
+export class OrgRepository implements IOrgRepository {
+  private col: Collection<DbEntity<OrgModel>>;
 
   constructor(
     @Inject('DB')
     private db: DB
   ) {
-    this.col = this.db.getDb().collection<DbEntity<ProjectModel>>('projects');
+    this.col = this.db.getDb().collection<DbEntity<OrgModel>>('orgs');
   }
 
-  private toEntity = (
-    dbEntity: DbEntity<ProjectModel>
-  ): ProjectModel | undefined => {
+  private toEntity = (dbEntity: DbEntity<OrgModel>): OrgModel | undefined => {
     if (dbEntity == undefined) return undefined;
     const { _id, ...remainder } = dbEntity;
     return {
@@ -33,20 +28,20 @@ export class ProjectRepository implements IProjectRepository {
   private toDbEntity = ({
     id,
     ...remainder
-  }: ProjectModel): DbEntity<ProjectModel> => ({
+  }: OrgModel): DbEntity<OrgModel> => ({
     _id: id,
     ...remainder
   });
 
   // CREATE
-  async create(input: ProjectModel): Promise<Result<ID, Error>> {
+  async create(input: OrgModel): Promise<Result<ID, Error>> {
     const result = await this.col.insertOne(this.toDbEntity(input));
     if (!result.insertedId) return Err(new Error('Not created'));
     return Ok(result.insertedId);
   }
 
   // FIND
-  async findById(id: string): Promise<Result<ProjectModel | undefined, Error>> {
+  async findById(id: string): Promise<Result<OrgModel | undefined, Error>> {
     const dbEntity = await this.col.findOne({ _id: id });
     return Ok(this.toEntity(dbEntity));
   }
@@ -54,10 +49,10 @@ export class ProjectRepository implements IProjectRepository {
   // UPDATE
   async update(
     id: string,
-    data: Partial<ProjectModel>
-  ): Promise<Result<ProjectModel, Error>> {
+    data: Partial<OrgModel>
+  ): Promise<Result<OrgModel, Error>> {
     const dbEntity = await this.col.findOne({ _id: id });
-    if (!dbEntity) throw new NotFoundException('Project not found');
+    if (!dbEntity) throw new NotFoundException('Org not found');
     const toUpdateDbEntity = Object.assign(dbEntity, data);
     const updateResult = await this.col.replaceOne(
       { _id: id },
@@ -74,13 +69,5 @@ export class ProjectRepository implements IProjectRepository {
     if (result.deletedCount !== 1)
       return Err(new Error(`Deleted count=${result.deletedCount}`));
     return Ok(undefined);
-  }
-
-  // FIND BY KEY
-  async findByKey(
-    key: string
-  ): Promise<Result<ProjectModel | undefined, Error>> {
-    const dbEntity = await this.col.findOne({ key });
-    return Ok(this.toEntity(dbEntity));
   }
 }

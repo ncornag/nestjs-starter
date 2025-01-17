@@ -19,6 +19,12 @@ export interface IService<T, C, U> {
 export interface IRepository<T> {
   create(input: T): Promise<Result<ID, Error>>;
   findById(id: string): Promise<Result<T | undefined, Error>>;
-  update(is: string, input: Partial<T>): Promise<Result<T, Error>>;
+  update(id: string, input: Partial<T>): Promise<Result<T, Error>>;
   delete(id: string): Promise<Result<void, Error>>;
 }
+
+// PROJECT BASED PARAMS
+export const ProjectBasedParamsSchema = Type.Object({
+  projectId: Type.String()
+});
+export type ProjectBasedParams = Static<typeof ProjectBasedParamsSchema>;

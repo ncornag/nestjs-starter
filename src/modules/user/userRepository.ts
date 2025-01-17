@@ -1,28 +1,28 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { ProjectModel } from './projectModel';
 import {
-  IProjectRepository,
-  _IProjectRepository
-} from './projectRepository.interface';
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException
+} from '@nestjs/common';
+import { UserModel } from './userModel';
+import { IUserRepository } from './userRepository.interface';
 import { Collection } from 'mongodb';
 import { Err, Ok, Result } from 'ts-results-es';
 import { ID } from 'src/appModule.interfaces';
 import { DB, type DbEntity } from 'src/infrastructure/databaseModule';
 
 @Injectable()
-export class ProjectRepository implements IProjectRepository {
-  private col: Collection<DbEntity<ProjectModel>>;
+export class UserRepository implements IUserRepository {
+  private col: Collection<DbEntity<UserModel>>;
 
   constructor(
     @Inject('DB')
     private db: DB
   ) {
-    this.col = this.db.getDb().collection<DbEntity<ProjectModel>>('projects');
+    this.col = this.db.getDb().collection<DbEntity<UserModel>>('users');
   }
 
-  private toEntity = (
-    dbEntity: DbEntity<ProjectModel>
-  ): ProjectModel | undefined => {
+  private toEntity = (dbEntity: DbEntity<UserModel>): UserModel | undefined => {
     if (dbEntity == undefined) return undefined;
     const { _id, ...remainder } = dbEntity;
     return {
@@ -33,20 +33,20 @@ export class ProjectRepository implements IProjectRepository {
   private toDbEntity = ({
     id,
     ...remainder
-  }: ProjectModel): DbEntity<ProjectModel> => ({
+  }: UserModel): DbEntity<UserModel> => ({
     _id: id,
     ...remainder
   });
 
   // CREATE
-  async create(input: ProjectModel): Promise<Result<ID, Error>> {
+  async create(input: UserModel): Promise<Result<ID, Error>> {
     const result = await this.col.insertOne(this.toDbEntity(input));
     if (!result.insertedId) return Err(new Error('Not created'));
     return Ok(result.insertedId);
   }
 
   // FIND
-  async findById(id: string): Promise<Result<ProjectModel | undefined, Error>> {
+  async findById(id: string): Promise<Result<UserModel | undefined, Error>> {
     const dbEntity = await this.col.findOne({ _id: id });
     return Ok(this.toEntity(dbEntity));
   }
@@ -54,10 +54,10 @@ export class ProjectRepository implements IProjectRepository {
   // UPDATE
   async update(
     id: string,
-    data: Partial<ProjectModel>
-  ): Promise<Result<ProjectModel, Error>> {
+    data: Partial<UserModel>
+  ): Promise<Result<UserModel, Error>> {
     const dbEntity = await this.col.findOne({ _id: id });
-    if (!dbEntity) throw new NotFoundException('Project not found');
+    if (!dbEntity) throw new NotFoundException('User not found');
     const toUpdateDbEntity = Object.assign(dbEntity, data);
     const updateResult = await this.col.replaceOne(
       { _id: id },
@@ -76,11 +76,11 @@ export class ProjectRepository implements IProjectRepository {
     return Ok(undefined);
   }
 
-  // FIND BY KEY
-  async findByKey(
-    key: string
-  ): Promise<Result<ProjectModel | undefined, Error>> {
-    const dbEntity = await this.col.findOne({ key });
+  // FIND BY USERNAME
+  async findByUsername(
+    username: string
+  ): Promise<Result<UserModel | undefined, Error>> {
+    const dbEntity = await this.col.findOne({ username });
     return Ok(this.toEntity(dbEntity));
   }
 }

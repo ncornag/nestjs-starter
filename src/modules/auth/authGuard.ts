@@ -12,6 +12,23 @@ import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 import { Reflector } from '@nestjs/core';
 
+// {
+//   "jti": "Tj1cD7JG1Vf4p0eFO3dAL",
+//   "sub": "app",
+//   "iat": 1735554259,
+//   "exp": 1767090259,
+//   "scope": "catalog:read catalog:write",
+//   "client_id": "app",
+//   "iss": "http://ecomm.com",
+//   "aud": "project:test"
+// }
+
+// {
+//   "username": "john",
+//   "sub": 1,
+//   "iat": 1736530058,
+//   "exp": 1768066058
+// }
 export const AllowScopes = (scopes: string[] | string): Type<CanActivate> => {
   @Injectable()
   class AuthGuardMixin implements CanActivate {

@@ -1,25 +1,26 @@
 import { Module } from '@nestjs/common';
+import { DatabaseModule } from 'src/infrastructure/databaseModule';
 import { ProjectController } from './projectController';
 import { ProjectService } from './projectService';
-import { PROJECT_SERVICE_TOKEN } from './projectService.interface';
+import { _IProjectService } from './projectService.interface';
 import { ProjectRepository } from './projectRepository';
-import { PROJECT_REPOSITORY_TOKEN } from './projectRepository.interface';
-import { DatabaseModule } from 'src/infrastructure/databaseModule';
+import { _IProjectRepository } from './projectRepository.interface';
+import { RequestContextModule } from 'nestjs-request-context';
 
 @Module({
-  imports: [DatabaseModule],
+  imports: [DatabaseModule, RequestContextModule],
   controllers: [ProjectController],
   providers: [
     ProjectService,
     {
-      provide: PROJECT_SERVICE_TOKEN,
+      provide: _IProjectService,
       useClass: ProjectService
     },
     {
-      provide: PROJECT_REPOSITORY_TOKEN,
+      provide: _IProjectRepository,
       useClass: ProjectRepository
     }
-  ]
-  //exports: [ProjectService]
+  ],
+  exports: [ProjectService]
 })
 export class ProjectModule {}

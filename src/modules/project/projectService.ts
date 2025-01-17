@@ -4,27 +4,26 @@ import {
   Injectable,
   NotFoundException
 } from '@nestjs/common';
-import { Logger } from '@nestjs/common';
 import { nanoid } from 'nanoid';
+import { PinoLogger } from 'nestjs-pino';
 import { ProjectModel } from './projectModel';
+import { ID } from 'src/appModule.interfaces';
 import {
-  CreateProjectBody,
   IProjectService,
+  CreateProjectBody,
   UpdateProjectBody
 } from './projectService.interface';
 import {
   IProjectRepository,
-  PROJECT_REPOSITORY_TOKEN
+  _IProjectRepository
 } from './projectRepository.interface';
-import { ID } from 'src/appModule.interfaces';
-import { PinoLogger } from 'nestjs-pino';
 import { RequestContext } from 'nestjs-request-context';
 import { IncomingMessage } from 'http';
 
 @Injectable()
 export class ProjectService implements IProjectService {
   constructor(
-    @Inject(PROJECT_REPOSITORY_TOKEN)
+    @Inject(_IProjectRepository)
     private readonly repository: IProjectRepository,
     private readonly logger: PinoLogger
   ) {}
@@ -35,7 +34,7 @@ export class ProjectService implements IProjectService {
   }
 
   // CREATE
-  async create(data: CreateProjectBody) {
+  async create(data: CreateProjectBody): Promise<ID> {
     const result = await this.repository.findByKey(data.key);
     if (result.isOk() && result.value)
       throw new BadRequestException('Project key already exists');
@@ -62,6 +61,13 @@ export class ProjectService implements IProjectService {
   // DELETE
   async delete(id: string): Promise<void> {
     const result = await this.repository.delete(id);
+    if (result.isErr()) throw result.error;
+    return result.value;
+  }
+
+  // FIND BY KEY
+  async findByKey(key: string): Promise<ProjectModel | undefined> {
+    const result = await this.repository.findByKey(key);
     if (result.isErr()) throw result.error;
     return result.value;
   }

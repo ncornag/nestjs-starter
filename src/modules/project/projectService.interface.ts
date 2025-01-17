@@ -1,14 +1,8 @@
 import { Type, type Static } from '@sinclair/typebox';
-import { idSchema, IService } from 'src/appModule.interfaces';
+import { IService } from 'src/appModule.interfaces';
 import { ProjectModel, ProjectModelSchema } from './projectModel';
 
-export const PROJECT_SERVICE_TOKEN = 'PROJECT_SERVICE_TOKEN';
-
-// PROJECT BASED PARAMS
-export const ProjectBasedParamsSchema = Type.Object({
-  projectId: Type.String()
-});
-export type ProjectBasedParams = Static<typeof ProjectBasedParamsSchema>;
+export const _IProjectService = 'IProjectService';
 
 // RESPONSE
 export const ProjectResponseSchema = ProjectModelSchema;
@@ -34,4 +28,6 @@ export type UpdateProjectParams = Static<typeof UpdateProjectParamsSchema>;
 
 // INTERFACE
 export interface IProjectService
-  extends IService<ProjectModel, CreateProjectBody, UpdateProjectBody> {}
+  extends IService<ProjectModel, CreateProjectBody, UpdateProjectBody> {
+  findByKey(key: string): Promise<ProjectModel | undefined>;
+}
