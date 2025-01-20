@@ -5,10 +5,9 @@ import { ProjectService } from './projectService';
 import { _IProjectService } from './projectService.interface';
 import { ProjectRepository } from './projectRepository';
 import { _IProjectRepository } from './projectRepository.interface';
-import { RequestContextModule } from 'nestjs-request-context';
 
 @Module({
-  imports: [DatabaseModule, RequestContextModule],
+  imports: [DatabaseModule],
   controllers: [ProjectController],
   providers: [
     ProjectService,

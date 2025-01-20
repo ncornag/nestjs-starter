@@ -4,9 +4,9 @@ import { ProjectModule } from './modules/project/projectModule';
 import { UserModule } from './modules/user/userModule';
 import { DatabaseModule } from './infrastructure/databaseModule';
 import { LoggerModule } from 'nestjs-pino';
-import { RequestContextModule } from 'nestjs-request-context';
 import { AuthModule } from './modules/auth/authModule';
 import { OrgModule } from './modules/org/orgModule';
+import { ClsModule } from 'nestjs-cls';
 
 export const loggerConfig = {
   level: process.env.LOG_LEVEL || 'info',
@@ -34,7 +34,10 @@ export const loggerConfig = {
       pinoHttp: loggerConfig
     }),
     DatabaseModule,
-    RequestContextModule,
+    ClsModule.forRoot({
+      global: true,
+      middleware: { mount: true }
+    }),
     AuthModule,
     UserModule,
     OrgModule,

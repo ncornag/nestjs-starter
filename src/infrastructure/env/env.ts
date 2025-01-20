@@ -12,6 +12,8 @@ export const envSchema = Type.Object({
   LOG_LEVEL: Type.String(),
   API_HOST: Type.String(),
   API_PORT: Type.Number(),
-  MONGO_URL: Type.String()
+  MONGO_URL: Type.String(),
+  ISS: Type.String({ default: 'ecomm-starter' }),
+  AUD: Type.String({ default: 'ecomm-auth' })
 });
 export type Env = Static<typeof envSchema>;

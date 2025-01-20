@@ -1,9 +1,4 @@
-import {
-  BadRequestException,
-  Inject,
-  Injectable,
-  NotFoundException
-} from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { nanoid } from 'nanoid';
 import { PinoLogger } from 'nestjs-pino';
 import { ProjectModel } from './projectModel';
@@ -13,12 +8,7 @@ import {
   CreateProjectBody,
   UpdateProjectBody
 } from './projectService.interface';
-import {
-  IProjectRepository,
-  _IProjectRepository
-} from './projectRepository.interface';
-import { RequestContext } from 'nestjs-request-context';
-import { IncomingMessage } from 'http';
+import { IProjectRepository, _IProjectRepository } from './projectRepository.interface';
 
 @Injectable()
 export class ProjectService implements IProjectService {
@@ -27,11 +17,6 @@ export class ProjectService implements IProjectService {
     private readonly repository: IProjectRepository,
     private readonly logger: PinoLogger
   ) {}
-
-  getRequestId() {
-    const req = RequestContext.currentContext.req as IncomingMessage;
-    return req.id;
-  }
 
   // CREATE
   async create(data: CreateProjectBody): Promise<ID> {

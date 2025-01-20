@@ -29,7 +29,7 @@ export class UserService implements IUserService {
     if (result.isOk() && result.value)
       throw new BadRequestException('Username already exists');
     const id = nanoid();
-    await this.repository.create({ id, ...data });
+    await this.repository.create({ id, ...data, roles: ['role:admin'] });
     return id;
   }
 

@@ -9,40 +9,29 @@ import { nanoid } from 'nanoid';
 import { PinoLogger } from 'nestjs-pino';
 import { OrgModel } from './orgModel';
 import { ID } from 'src/appModule.interfaces';
-import {
-  IOrgService,
-  CreateOrgBody,
-  UpdateOrgBody
-} from './orgService.interface';
+import { IOrgService, CreateOrgBody, UpdateOrgBody } from './orgService.interface';
 import { IOrgRepository, _IOrgRepository } from './orgRepository.interface';
-import { RequestContext } from 'nestjs-request-context';
-import { IncomingMessage } from 'http';
+import { ClsService } from 'nestjs-cls';
 
 @Injectable()
 export class OrgService implements IOrgService {
   constructor(
     @Inject(_IOrgRepository)
     private readonly repository: IOrgRepository,
-    private readonly logger: PinoLogger
+    private readonly logger: PinoLogger,
+    private readonly cls: ClsService
   ) {}
 
-  getRequestId() {
-    const req = RequestContext.currentContext.req as IncomingMessage;
-    return req.id;
-  }
-
   // CREATE
-  async createWithOwner(ownerId: ID, data: CreateOrgBody): Promise<ID> {
+  async create(data: CreateOrgBody): Promise<ID> {
     const id = nanoid();
+    const ownerId = this.cls.get('user').sub;
     await this.repository.create({
       id,
       ownerId,
       ...data
     });
     return id;
-  }
-  async create(data: CreateOrgBody): Promise<ID> {
-    throw new NotImplementedException();
   }
 
   // FIND

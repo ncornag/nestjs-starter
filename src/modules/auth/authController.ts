@@ -1,20 +1,8 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Post,
-  Request,
-  UseGuards
-} from '@nestjs/common';
+import { Body, Controller, Get, Post, Request, Res, UseGuards } from '@nestjs/common';
 import { LocalAuthGuard } from './localAuthGuard';
 import { AuthService } from './authService';
-import { JwtAuthGuard } from './jwtAuthGuard';
 import { Validate } from 'nestjs-typebox';
-import {
-  CreateUserBody,
-  CreateUserBodySchema,
-  UserResponseSchema
-} from '../user/userService.interface';
+import { CreateUserBody, CreateUserBodySchema } from '../user/userService.interface';
 import { idSchema } from 'src/appModule.interfaces';
 
 @Controller('auth')
@@ -31,25 +19,14 @@ export class AuthController {
       }
     ]
   })
-  async signup(data: CreateUserBody) {
-    return this.authService.signUp(data);
+  async signup(data: CreateUserBody, @Res() res) {
+    const id = await this.authService.signUp(data);
+    return res.status(201).send({ id });
   }
 
   @UseGuards(LocalAuthGuard)
   @Post('login')
   async login(@Request() req) {
     return this.authService.login(req.user);
-  }
-
-  @UseGuards(LocalAuthGuard)
-  @Post('logout')
-  async logout(@Request() req) {
-    req.logout((err) => {});
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Get('profile')
-  getProfile(@Request() req) {
-    return req.user;
   }
 }

@@ -11,9 +11,13 @@ export const UserResponseSchema = Type.Omit(UserModelSchema, ['password'], {
 export type UserResponse = Static<typeof UserResponseSchema>;
 
 // CREATE
-export const CreateUserBodySchema = Type.Omit(UserModelSchema, ['id'], {
-  additionalProperties: false
-});
+export const CreateUserBodySchema = Type.Omit(
+  UserModelSchema,
+  ['id', 'roles'],
+  {
+    additionalProperties: false
+  }
+);
 export type CreateUserBody = Static<typeof CreateUserBodySchema>;
 
 // UPDATE

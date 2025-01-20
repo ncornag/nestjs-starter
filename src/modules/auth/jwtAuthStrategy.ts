@@ -2,10 +2,11 @@ import * as fs from 'fs';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable } from '@nestjs/common';
+import { ClsService } from 'nestjs-cls';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor() {
+  constructor(private readonly cls: ClsService) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
@@ -13,7 +14,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: any) {
-    return { id: payload.sub };
+  async validate(payload) {
+    // TODO Check revoqued tokens?
+    // TODO Validate user exists and is still valid?
+    // TODO Enrich the user object?
+    console.log(payload);
+    const userData = { id: payload.sub, claims: payload.claims };
+    this.cls.set('user', payload);
+    return userData;
   }
 }

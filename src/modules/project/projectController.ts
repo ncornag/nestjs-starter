@@ -1,13 +1,4 @@
-import {
-  Get,
-  Delete,
-  Patch,
-  Post,
-  Controller,
-  Inject,
-  Res,
-  UseGuards
-} from '@nestjs/common';
+import { Get, Delete, Patch, Post, Controller, Inject, Res, UseGuards } from '@nestjs/common';
 import { Validate } from 'nestjs-typebox';
 import {
   _IProjectService,
@@ -18,13 +9,8 @@ import {
   UpdateProjectBody
 } from './projectService.interface';
 import { ProjectModel, ProjectModelSchema } from './projectModel';
-import {
-  idSchema,
-  ID,
-  projectIdSchema,
-  ProjectID
-} from 'src/appModule.interfaces';
-import { AllowScopes } from 'src/modules/auth/authGuard';
+import { idSchema, ID, projectIdSchema, ProjectID } from 'src/appModule.interfaces';
+import { AllowScopes } from 'src/modules/auth/scopesAuthGuard';
 
 // CONTROLLER
 @Controller(':projectId/projects')
@@ -34,7 +20,7 @@ export class ProjectController {
     private readonly service: IProjectService
   ) {}
 
-  @UseGuards(AllowScopes('catalog:write'))
+  // @UseGuards(AllowScopes('catalog:write'))
   @Post()
   @Validate({
     response: idSchema,
@@ -50,11 +36,7 @@ export class ProjectController {
       }
     ]
   })
-  async create(
-    projectId: ProjectID,
-    data: CreateProjectBody,
-    @Res() res
-  ): Promise<string> {
+  async create(projectId: ProjectID, data: CreateProjectBody, @Res() res): Promise<string> {
     const id = await this.service.create(data);
     return res.status(201).send({ id });
   }
@@ -101,11 +83,7 @@ export class ProjectController {
       }
     ]
   })
-  async update(
-    projectId: ProjectID,
-    id: ID,
-    data: UpdateProjectBody
-  ): Promise<ProjectModel> {
+  async update(projectId: ProjectID, id: ID, data: UpdateProjectBody): Promise<ProjectModel> {
     return await this.service.update(id, data);
   }
 

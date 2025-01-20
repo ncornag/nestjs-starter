@@ -16,11 +16,13 @@ import {
   CreateOrgBodySchema,
   CreateOrgBody,
   UpdateOrgBodySchema,
-  UpdateOrgBody
+  UpdateOrgBody,
+  OrgResponseSchema
 } from './orgService.interface';
 import { OrgModel, OrgModelSchema } from './orgModel';
 import { idSchema, ID } from 'src/appModule.interfaces';
 import { JwtAuthGuard } from '../auth/jwtAuthGuard';
+import { AllowScopes } from '../auth/scopesAuthGuard';
 
 // CONTROLLER
 @Controller('orgs')
@@ -30,8 +32,9 @@ export class OrgController {
     private readonly service: IOrgService
   ) {}
 
+  // CREATE
   @Post()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, AllowScopes(['role:admin']))
   @Validate({
     response: idSchema,
     request: [
@@ -41,20 +44,16 @@ export class OrgController {
       }
     ]
   })
-  async create(
-    data: CreateOrgBody,
-    @Res() res,
-    @Request() req
-  ): Promise<string> {
-    const id = await this.service.createWithOwner(req.user.id, data);
+  async create(data: CreateOrgBody, @Res() res): Promise<string> {
+    const id = await this.service.create(data);
     return res.status(201).send({ id });
   }
 
   // GET
   @Get(':id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, AllowScopes(['role:admin']))
   @Validate({
-    response: OrgModelSchema,
+    response: OrgResponseSchema,
     request: [
       {
         name: 'id',
@@ -63,13 +62,13 @@ export class OrgController {
       }
     ]
   })
-  async get(id: ID): Promise<OrgModel> {
+  async get(id: ID, @Request() req): Promise<OrgModel> {
     return await this.service.findById(id);
   }
 
   // UPDATE
   @Patch(':id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, AllowScopes(['role:admin']))
   @Validate({
     response: OrgModelSchema,
     request: [
@@ -90,7 +89,7 @@ export class OrgController {
 
   // DELETE
   @Delete(':id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, AllowScopes(['role:admin']))
   @Validate({
     request: [
       {
