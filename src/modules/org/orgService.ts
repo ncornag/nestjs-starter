@@ -25,7 +25,7 @@ export class OrgService implements IOrgService {
   // CREATE
   async create(data: CreateOrgBody): Promise<ID> {
     const id = nanoid();
-    const ownerId = this.cls.get('user').sub;
+    const ownerId = this.cls.get('user').id;
     await this.repository.create({
       id,
       ownerId,
@@ -36,27 +36,29 @@ export class OrgService implements IOrgService {
 
   // FIND
   async findById(id: ID): Promise<OrgModel> {
-    const result = await this.repository.findById(id);
+    const ownerId = this.cls.get('user').id;
+    const result = await this.repository.find({ id, ownerId });
     if (result.isErr()) throw result.error;
-    if (!result.value) throw new NotFoundException('Org not found');
-    return result.value;
+    if (!result.value[0]) throw new NotFoundException('Org not found');
+    return result.value[0];
   }
 
   // UPDATE
   async update(id: ID, data: UpdateOrgBody): Promise<OrgModel> {
-    const result = await this.repository.update(id, data);
+    const result = await this.repository.updateOne({ id }, data);
     if (result.isErr()) throw result.error;
     return result.value;
   }
 
   // DELETE
   async delete(id: string): Promise<void> {
-    const result = await this.repository.findById(id);
+    const ownerId = this.cls.get('user').id;
+    const result = await this.repository.find({ id, ownerId });
     if (result.isErr()) throw result.error;
-    if (!result.value) throw new NotFoundException('Org not found');
-    if (result.value.projects.length)
+    if (!result.value[0]) throw new NotFoundException('Org not found');
+    if (result.value[0].projects.length)
       throw new BadRequestException("Can't delete an Org with Projects");
-    const deleteResult = await this.repository.delete(id);
+    const deleteResult = await this.repository.deleteOne(id);
     if (deleteResult.isErr()) throw deleteResult.error;
     return deleteResult.value;
   }

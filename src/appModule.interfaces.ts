@@ -1,5 +1,5 @@
 import { Type, type Static } from '@sinclair/typebox';
-import { Option, Result } from 'ts-results-es';
+import { Result } from 'ts-results-es';
 
 // ID TYPES
 export const idSchema = Type.String();
@@ -18,9 +18,9 @@ export interface IService<T, C, U> {
 // GENERIC REPOSITORY
 export interface IRepository<T> {
   create(input: T): Promise<Result<ID, Error>>;
-  findById(id: string): Promise<Result<T | undefined, Error>>;
-  update(id: string, input: Partial<T>): Promise<Result<T, Error>>;
-  delete(id: string): Promise<Result<void, Error>>;
+  find(where: any): Promise<Result<T[] | undefined, Error>>;
+  updateOne(where: any, input: Partial<T>): Promise<Result<T, Error>>;
+  deleteOne(where: any): Promise<Result<void, Error>>;
 }
 
 // PROJECT BASED PARAMS

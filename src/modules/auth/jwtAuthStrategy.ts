@@ -18,9 +18,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     // TODO Check revoqued tokens?
     // TODO Validate user exists and is still valid?
     // TODO Enrich the user object?
-    console.log(payload);
     const userData = { id: payload.sub, claims: payload.claims };
-    this.cls.set('user', payload);
+    this.cls.set('user', userData);
     return userData;
   }
 }

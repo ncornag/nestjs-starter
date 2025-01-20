@@ -4,22 +4,35 @@ import { red, green, yellow, bold } from 'kolorist';
 import { PinoLogger } from 'nestjs-pino';
 import { EnvService } from './env/envService';
 import { EnvModule } from './env/envModule';
-import { ProjectModel } from 'src/modules/project/projectModel';
+import { ID } from 'src/appModule.interfaces';
 
 export interface DB {
   client: MongoClient;
   getDb: (projectId?: string) => Db;
-  getCol: <T>(
-    projectId: string,
-    entity: string,
-    catalogId?: string
-  ) => Collection<T>;
+  getCol: <T>(projectId: string, entity: string, catalogId?: string) => Collection<T>;
   colName: (projectId: string, entity: string, catalogId?: string) => string;
 }
 
-export type DbEntity<T extends { id: any }> = Omit<T, 'id'> & {
+export type Entity = {
+  id: ID;
+  [key: string]: any;
+};
+
+export type DbEntity<T extends Entity> = Omit<T, 'id'> & {
   _id?: T['id'];
 };
+
+export const toEntity = <T extends Entity>(dbEntity: DbEntity<T>): T | undefined => {
+  if (dbEntity == undefined) return undefined;
+  const { _id, ...remainder } = dbEntity;
+  return {
+    id: _id,
+    ...remainder
+  } as T;
+};
+
+export const toDbEntity = <T extends Entity>({ id, ...remainder }): DbEntity<T> =>
+  Object.assign(remainder, id && { _id: id }) as DbEntity<T>;
 
 @Module({
   imports: [EnvModule],
@@ -39,11 +52,7 @@ export type DbEntity<T extends { id: any }> = Omit<T, 'id'> & {
         ];
         // Iterceptor targets
         const createTargets: string[] = ['insertOne'];
-        const updateTargets: string[] = [
-          'updateOne',
-          'updateMany',
-          'bulkWrite'
-        ];
+        const updateTargets: string[] = ['updateOne', 'updateMany', 'bulkWrite'];
         // Interceptors NegativeFilter
         const negativeFilterInterceptor: Record<string, boolean> = {
           _Events: true
@@ -70,15 +79,10 @@ export type DbEntity<T extends { id: any }> = Omit<T, 'id'> & {
             entity: string,
             catalogId?: string
           ): Collection<T> =>
-            getDb(projectId).collection<T>(
-              colName(projectId, entity, catalogId)
-            );
+            getDb(projectId).collection<T>(colName(projectId, entity, catalogId));
 
-          const colName = (
-            projectId: string,
-            entity: string,
-            catalogId?: string
-          ) => `${entity}${catalogId ? `_${catalogId}` : ''}`;
+          const colName = (projectId: string, entity: string, catalogId?: string) =>
+            `${entity}${catalogId ? `_${catalogId}` : ''}`;
 
           // Loggers
           client.on('commandStarted', (event) => {
@@ -91,14 +95,10 @@ export type DbEntity<T extends { id: any }> = Omit<T, 'id'> & {
           client.on('commandSucceeded', (event) => {
             if (ignoredCommandsForLogging.includes(event.commandName)) return;
             if (logger.level === 'debug')
-              logger.debug(
-                `${dbIn} ${event.requestId} ${green(JSON.stringify(event.reply))}`
-              );
+              logger.debug(`${dbIn} ${event.requestId} ${green(JSON.stringify(event.reply))}`);
           });
           client.on('commandFailed', (event) =>
-            logger.warn(
-              `${dbIn} ${event.requestId} ${red(JSON.stringify(event, null, 2))}`
-            )
+            logger.warn(`${dbIn} ${event.requestId} ${red(JSON.stringify(event, null, 2))}`)
           );
 
           // Create Interceptor -- Create timestamp / version
@@ -124,8 +124,7 @@ export type DbEntity<T extends { id: any }> = Omit<T, 'id'> & {
             filter: any,
             update: any
           ) {
-            if (negativeFilterInterceptor[collectionName])
-              return { filter, update };
+            if (negativeFilterInterceptor[collectionName]) return { filter, update };
             const set = update.$set || {};
             const inc = update.$inc || {};
             // Version management
@@ -158,10 +157,7 @@ export type DbEntity<T extends { id: any }> = Omit<T, 'id'> & {
                   } else if (a.insertOne) {
                     return {
                       insertOne: {
-                        document: createOne(
-                          collectionName,
-                          a.insertOne.document
-                        )
+                        document: createOne(collectionName, a.insertOne.document)
                       }
                     };
                   }

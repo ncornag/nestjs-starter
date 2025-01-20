@@ -20,8 +20,8 @@ export class ProjectService implements IProjectService {
 
   // CREATE
   async create(data: CreateProjectBody): Promise<ID> {
-    const result = await this.repository.findByKey(data.key);
-    if (result.isOk() && result.value)
+    const result = await this.repository.find({ key: data.key });
+    if (result.isOk() && result.value[0])
       throw new BadRequestException('Project key already exists');
     const id = nanoid();
     await this.repository.create({ id, ...data });
@@ -30,30 +30,31 @@ export class ProjectService implements IProjectService {
 
   // FIND
   async findById(id: ID): Promise<ProjectModel> {
-    const result = await this.repository.findById(id);
+    const result = await this.repository.find({ id });
     if (result.isErr()) throw result.error;
-    if (!result.value) throw new NotFoundException('Project not found');
-    return result.value;
+    if (!result.value[0]) throw new NotFoundException('Project not found');
+    return result.value[0];
   }
 
   // UPDATE
   async update(id: ID, data: UpdateProjectBody): Promise<ProjectModel> {
-    const result = await this.repository.update(id, data);
+    const result = await this.repository.updateOne({ id }, data);
     if (result.isErr()) throw result.error;
     return result.value;
   }
 
   // DELETE
   async delete(id: string): Promise<void> {
-    const result = await this.repository.delete(id);
+    const result = await this.repository.deleteOne({ id });
     if (result.isErr()) throw result.error;
     return result.value;
   }
 
   // FIND BY KEY
   async findByKey(key: string): Promise<ProjectModel | undefined> {
-    const result = await this.repository.findByKey(key);
+    const result = await this.repository.find({ key });
     if (result.isErr()) throw result.error;
-    return result.value;
+    if (!result.value[0]) throw new NotFoundException('Project not found');
+    return result.value[0];
   }
 }
