@@ -42,8 +42,8 @@ export const toDbEntity = <T extends Entity>({ id, ...remainder }): DbEntity<T> 
       inject: [EnvService, PinoLogger],
       useFactory: async (config: EnvService, logger): Promise<DB> => {
         const dbs = new Map<string, Db>();
-        const dbOut = bold(yellow('→')) + yellow('DB ');
-        const dbIn = bold(yellow('←')) + yellow('DB ');
+        const dbOut = bold(yellow('→')) + yellow('DB:');
+        const dbIn = bold(yellow('←')) + yellow('DB:');
         const ignoredCommandsForLogging = [
           'createIndexes',
           'listCollections',
@@ -87,19 +87,13 @@ export const toDbEntity = <T extends Entity>({ id, ...remainder }): DbEntity<T> 
           // Loggers
           client.on('commandStarted', (event) => {
             if (ignoredCommandsForLogging.includes(event.commandName)) return;
-            if (logger.level === 'debug')
-              logger.debug(
-                `${dbOut} ${event.requestId} ${green(JSON.stringify(event.command))}`
-              );
+            logger.debug('%s %o', dbOut, event.command);
           });
           client.on('commandSucceeded', (event) => {
             if (ignoredCommandsForLogging.includes(event.commandName)) return;
-            if (logger.level === 'debug')
-              logger.debug(`${dbIn} ${event.requestId} ${green(JSON.stringify(event.reply))}`);
+            logger.debug('%s %o', dbIn, event.reply);
           });
-          client.on('commandFailed', (event) =>
-            logger.warn(`${dbIn} ${event.requestId} ${red(JSON.stringify(event, null, 2))}`)
-          );
+          client.on('commandFailed', (event) => logger.warn('%s %o', dbIn, event));
 
           // Create Interceptor -- Create timestamp / version
           const createOne = function (collectionName: string, data: any) {
