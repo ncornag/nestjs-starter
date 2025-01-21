@@ -20,7 +20,7 @@ import {
   OrgResponseSchema
 } from './orgService.interface';
 import { OrgModel, OrgModelSchema } from './orgModel';
-import { idSchema, ID } from 'src/appModule.interfaces';
+import { idSchema, ID, Version, versionSchema } from 'src/appModule.interfaces';
 import { JwtAuthGuard } from '../auth/jwtAuthGuard';
 import { AllowScopes } from '../auth/scopesAuthGuard';
 
@@ -45,8 +45,8 @@ export class OrgController {
     ]
   })
   async create(data: CreateOrgBody, @Res() res): Promise<string> {
-    const id = await this.service.create(data);
-    return res.status(201).send({ id });
+    const idData = await this.service.create(data);
+    return res.status(201).send(idData);
   }
 
   // GET
@@ -72,19 +72,13 @@ export class OrgController {
   @Validate({
     response: OrgModelSchema,
     request: [
-      {
-        name: 'id',
-        type: 'param',
-        schema: idSchema
-      },
-      {
-        type: 'body',
-        schema: UpdateOrgBodySchema
-      }
+      { name: 'id', type: 'param', schema: idSchema },
+      { name: 'version', type: 'query', schema: versionSchema },
+      { type: 'body', schema: UpdateOrgBodySchema }
     ]
   })
-  async update(id: ID, data: UpdateOrgBody): Promise<OrgModel> {
-    return await this.service.update(id, data);
+  async update(id: ID, version: Version, data: UpdateOrgBody): Promise<OrgModel> {
+    return await this.service.update(id, version, data);
   }
 
   // DELETE

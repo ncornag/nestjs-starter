@@ -3,8 +3,9 @@ import { OrgModel } from './orgModel';
 import { IOrgRepository, _IOrgRepository } from './orgRepository.interface';
 import { Collection } from 'mongodb';
 import { Err, Ok, Result } from 'ts-results-es';
-import { ID } from 'src/appModule.interfaces';
+import { ID, IDWithVersion } from 'src/appModule.interfaces';
 import { DB, type DbEntity, toEntity, toDbEntity } from 'src/infrastructure/databaseModule';
+import { mongoDiff } from 'src/infrastructure/mongoDiff';
 
 @Injectable()
 export class OrgRepository implements IOrgRepository {
@@ -18,10 +19,10 @@ export class OrgRepository implements IOrgRepository {
   }
 
   // CREATE
-  async create(input: OrgModel): Promise<Result<ID, Error>> {
+  async create(input: OrgModel): Promise<Result<IDWithVersion, Error>> {
     const result = await this.col.insertOne(toDbEntity<OrgModel>(input));
     if (!result.insertedId) return Err(new Error('Not created'));
-    return Ok(result.insertedId);
+    return Ok({ id: result.insertedId, version: 0 });
   }
 
   // FIND
@@ -34,14 +35,12 @@ export class OrgRepository implements IOrgRepository {
   async updateOne(where: any, data: Partial<OrgModel>): Promise<Result<OrgModel, Error>> {
     const dbEntity = await this.col.findOne(toDbEntity<OrgModel>(where));
     if (!dbEntity) throw new NotFoundException('Org not found');
-    const toUpdateDbEntity = Object.assign(dbEntity, data);
-    const updateResult = await this.col.replaceOne(
-      toDbEntity<OrgModel>(where),
-      toUpdateDbEntity
-    );
+    const { ops, updated } = mongoDiff(dbEntity, data);
+    if (!ops) return Ok(toEntity<OrgModel>(dbEntity));
+    const updateResult = await this.col.updateOne(toDbEntity<OrgModel>(where), ops);
     if (updateResult.modifiedCount !== 1)
       return Err(new Error(`Modified count=${updateResult.modifiedCount}`));
-    return Ok(toEntity<OrgModel>(toUpdateDbEntity));
+    return Ok(toEntity<OrgModel>({ ...updated, version: updated.version + 1 }));
   }
 
   // DELETE
@@ -50,5 +49,27 @@ export class OrgRepository implements IOrgRepository {
     if (result.deletedCount !== 1)
       return Err(new Error(`Deleted count=${result.deletedCount}`));
     return Ok(undefined);
+  }
+
+  // ADD PROJECT
+  async addProject(orgId: ID, projectId: ID): Promise<Result<undefined, Error>> {
+    const updateResult = await this.col.updateOne(
+      { _id: orgId, version: { $gte: 0 } },
+      { $push: { projects: projectId } }
+    );
+    if (updateResult.modifiedCount !== 1)
+      return Err(new Error(`Modified count=${updateResult.modifiedCount}`));
+    return new Ok(undefined);
+  }
+
+  // REMOVE PROJECT
+  async removeProject(orgId: ID, projectId: ID): Promise<Result<undefined, Error>> {
+    const updateResult = await this.col.updateOne(
+      { _id: orgId },
+      { $pull: { projects: projectId } }
+    );
+    if (updateResult.modifiedCount !== 1)
+      return Err(new Error(`Modified count=${updateResult.modifiedCount}`));
+    return new Ok(undefined);
   }
 }

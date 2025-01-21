@@ -5,12 +5,12 @@ import { ProjectService } from './projectService';
 import { _IProjectService } from './projectService.interface';
 import { ProjectRepository } from './projectRepository';
 import { _IProjectRepository } from './projectRepository.interface';
+import { OrgModule } from '../org/orgModule';
 
 @Module({
-  imports: [DatabaseModule],
+  imports: [DatabaseModule, OrgModule],
   controllers: [ProjectController],
   providers: [
-    ProjectService,
     {
       provide: _IProjectService,
       useClass: ProjectService
@@ -20,6 +20,6 @@ import { _IProjectRepository } from './projectRepository.interface';
       useClass: ProjectRepository
     }
   ],
-  exports: [ProjectService]
+  exports: [_IProjectService]
 })
 export class ProjectModule {}

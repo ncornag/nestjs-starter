@@ -8,7 +8,6 @@ import { _IUserRepository } from './userRepository.interface';
 @Module({
   imports: [DatabaseModule],
   providers: [
-    UserService,
     {
       provide: _IUserService,
       useClass: UserService
@@ -18,6 +17,6 @@ import { _IUserRepository } from './userRepository.interface';
       useClass: UserRepository
     }
   ],
-  exports: [UserService]
+  exports: [_IUserService]
 })
 export class UserModule {}

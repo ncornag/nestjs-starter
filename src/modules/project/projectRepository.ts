@@ -3,8 +3,10 @@ import { ProjectModel } from './projectModel';
 import { IProjectRepository, _IProjectRepository } from './projectRepository.interface';
 import { Collection } from 'mongodb';
 import { Err, Ok, Result } from 'ts-results-es';
-import { ID } from 'src/appModule.interfaces';
+import { IDWithVersion } from 'src/appModule.interfaces';
 import { DB, type DbEntity, toEntity, toDbEntity } from 'src/infrastructure/databaseModule';
+import { Value } from '@sinclair/typebox/value';
+import { mongoDiff } from 'src/infrastructure/mongoDiff';
 
 @Injectable()
 export class ProjectRepository implements IProjectRepository {
@@ -18,10 +20,10 @@ export class ProjectRepository implements IProjectRepository {
   }
 
   // CREATE
-  async create(input: ProjectModel): Promise<Result<ID, Error>> {
+  async create(input: ProjectModel): Promise<Result<IDWithVersion, Error>> {
     const result = await this.col.insertOne(toDbEntity<ProjectModel>(input));
     if (!result.insertedId) return Err(new Error('Not created'));
-    return Ok(result.insertedId);
+    return Ok({ id: result.insertedId, version: 0 });
   }
 
   // FIND
@@ -37,14 +39,12 @@ export class ProjectRepository implements IProjectRepository {
   ): Promise<Result<ProjectModel, Error>> {
     const dbEntity = await this.col.findOne(toDbEntity<ProjectModel>(where));
     if (!dbEntity) throw new NotFoundException('Project not found');
-    const toUpdateDbEntity = Object.assign(dbEntity, data);
-    const updateResult = await this.col.replaceOne(
-      toDbEntity<ProjectModel>(where),
-      toUpdateDbEntity
-    );
+    const { ops, updated } = mongoDiff(dbEntity, data);
+    if (!ops) return Ok(toEntity<ProjectModel>(dbEntity));
+    const updateResult = await this.col.updateOne(toDbEntity<ProjectModel>(where), ops);
     if (updateResult.modifiedCount !== 1)
       return Err(new Error(`Modified count=${updateResult.modifiedCount}`));
-    return Ok(toEntity<ProjectModel>(toUpdateDbEntity));
+    return Ok(toEntity<ProjectModel>({ ...updated, version: updated.version + 1 }));
   }
 
   // DELETE
@@ -53,5 +53,11 @@ export class ProjectRepository implements IProjectRepository {
     if (result.deletedCount !== 1)
       return Err(new Error(`Deleted count=${result.deletedCount}`));
     return Ok(undefined);
+  }
+
+  // AGGREGATE
+  async aggregate(pipeline: any[], options?: any): Promise<Result<any[], Error>> {
+    const result = await this.col.aggregate(pipeline, options).toArray();
+    return Ok(result);
   }
 }

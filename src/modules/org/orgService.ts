@@ -8,7 +8,7 @@ import {
 import { nanoid } from 'nanoid';
 import { PinoLogger } from 'nestjs-pino';
 import { OrgModel } from './orgModel';
-import { ID } from 'src/appModule.interfaces';
+import { ID, IDWithVersion, Version } from 'src/appModule.interfaces';
 import { IOrgService, CreateOrgBody, UpdateOrgBody } from './orgService.interface';
 import { IOrgRepository, _IOrgRepository } from './orgRepository.interface';
 import { ClsService } from 'nestjs-cls';
@@ -23,15 +23,18 @@ export class OrgService implements IOrgService {
   ) {}
 
   // CREATE
-  async create(data: CreateOrgBody): Promise<ID> {
+  async create(data: CreateOrgBody): Promise<IDWithVersion> {
+    // Create the Org
     const id = nanoid();
     const ownerId = this.cls.get('user').id;
-    await this.repository.create({
+    const result = await this.repository.create({
       id,
       ownerId,
       ...data
     });
-    return id;
+    if (result.isErr()) throw new BadRequestException(result.error);
+    // Return id data
+    return result.value;
   }
 
   // FIND
@@ -44,8 +47,8 @@ export class OrgService implements IOrgService {
   }
 
   // UPDATE
-  async update(id: ID, data: UpdateOrgBody): Promise<OrgModel> {
-    const result = await this.repository.updateOne({ id }, data);
+  async update(id: ID, version: Version, data: UpdateOrgBody): Promise<OrgModel> {
+    const result = await this.repository.updateOne({ id, version }, data);
     if (result.isErr()) throw result.error;
     return result.value;
   }
@@ -61,5 +64,19 @@ export class OrgService implements IOrgService {
     const deleteResult = await this.repository.deleteOne(id);
     if (deleteResult.isErr()) throw deleteResult.error;
     return deleteResult.value;
+  }
+
+  // ADD PROJECT
+  async addProject(orgId: ID, projectId: ID): Promise<void> {
+    const result = await this.repository.addProject(orgId, projectId);
+    if (result.isErr()) throw result.error;
+    return;
+  }
+
+  // REMOVE PROJECT
+  async removeProject(orgId: ID, projectId: ID): Promise<void> {
+    const result = await this.repository.removeProject(orgId, projectId);
+    if (result.isErr()) throw result.error;
+    return;
   }
 }

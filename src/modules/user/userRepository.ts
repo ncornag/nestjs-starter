@@ -3,8 +3,9 @@ import { UserModel } from './userModel';
 import { IUserRepository } from './userRepository.interface';
 import { Collection } from 'mongodb';
 import { Err, Ok, Result } from 'ts-results-es';
-import { ID } from 'src/appModule.interfaces';
+import { IDWithVersion } from 'src/appModule.interfaces';
 import { DB, type DbEntity, toEntity, toDbEntity } from 'src/infrastructure/databaseModule';
+import { mongoDiff } from 'src/infrastructure/mongoDiff';
 
 @Injectable()
 export class UserRepository implements IUserRepository {
@@ -18,10 +19,10 @@ export class UserRepository implements IUserRepository {
   }
 
   // CREATE
-  async create(input: UserModel): Promise<Result<ID, Error>> {
+  async create(input: UserModel): Promise<Result<IDWithVersion, Error>> {
     const result = await this.col.insertOne(toDbEntity<UserModel>(input));
     if (!result.insertedId) return Err(new Error('Not created'));
-    return Ok(result.insertedId);
+    return Ok({ id: result.insertedId, version: 0 });
   }
 
   // FIND
@@ -33,15 +34,13 @@ export class UserRepository implements IUserRepository {
   // UPDATE
   async updateOne(where: any, data: Partial<UserModel>): Promise<Result<UserModel, Error>> {
     const dbEntity = await this.col.findOne(toDbEntity<UserModel>(where));
-    if (!dbEntity) throw new NotFoundException('User not found');
-    const toUpdateDbEntity = Object.assign(dbEntity, data);
-    const updateResult = await this.col.replaceOne(
-      toDbEntity<UserModel>(where),
-      toUpdateDbEntity
-    );
+    if (!dbEntity) throw new NotFoundException('Project not found');
+    const { ops, updated } = mongoDiff(dbEntity, data);
+    if (!ops) return Ok(toEntity<UserModel>(dbEntity));
+    const updateResult = await this.col.updateOne(toDbEntity<UserModel>(where), ops);
     if (updateResult.modifiedCount !== 1)
       return Err(new Error(`Modified count=${updateResult.modifiedCount}`));
-    return Ok(toEntity<UserModel>(toUpdateDbEntity));
+    return Ok(toEntity<UserModel>({ ...updated, version: updated.version + 1 }));
   }
 
   // DELETE

@@ -28,7 +28,7 @@ export const AllowScopes = (scopes: string[] | string): Type<CanActivate> => {
     async canActivate(context: ExecutionContext): Promise<boolean> {
       try {
         const user = this.cls.get('user');
-        const request = (context as any).getRequest();
+        const request = context.switchToHttp().getRequest();
         // Check project claim
         if (this.routeExpectedClaims.find((s) => s === PROJECT_SCOPED) !== undefined) {
           const requestProjectId = request.params.projectId;

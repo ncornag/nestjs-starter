@@ -6,104 +6,74 @@ import {
   CreateProjectBodySchema,
   CreateProjectBody,
   UpdateProjectBodySchema,
-  UpdateProjectBody
+  UpdateProjectBody,
+  ProjectResponseSchema
 } from './projectService.interface';
-import { ProjectModel, ProjectModelSchema } from './projectModel';
-import { idSchema, ID, projectIdSchema, ProjectID } from 'src/appModule.interfaces';
+import { ProjectModel } from './projectModel';
+import {
+  idSchema,
+  ID,
+  IDWithVersionSchema,
+  IDWithVersion,
+  versionSchema,
+  Version
+} from 'src/appModule.interfaces';
 import { AllowScopes } from 'src/modules/auth/scopesAuthGuard';
+import { JwtAuthGuard } from '../auth/jwtAuthGuard';
 
 // CONTROLLER
-@Controller(':projectId/projects')
+@Controller('projects')
 export class ProjectController {
   constructor(
     @Inject(_IProjectService)
     private readonly service: IProjectService
   ) {}
 
-  // @UseGuards(AllowScopes('catalog:write'))
+  // CREATE
   @Post()
+  @UseGuards(JwtAuthGuard, AllowScopes(['role:admin']))
   @Validate({
-    response: idSchema,
-    request: [
-      {
-        name: 'projectId',
-        type: 'param',
-        schema: projectIdSchema
-      },
-      {
-        type: 'body',
-        schema: CreateProjectBodySchema
-      }
-    ]
+    response: IDWithVersionSchema,
+    request: [{ type: 'body', schema: CreateProjectBodySchema }]
   })
-  async create(projectId: ProjectID, data: CreateProjectBody, @Res() res): Promise<string> {
-    const id = await this.service.create(data);
-    return res.status(201).send({ id });
+  async create(data: CreateProjectBody, @Res() res): Promise<IDWithVersion> {
+    const idData = await this.service.create(data);
+    return res.status(201).send(idData);
   }
 
   // GET
   @Get(':id')
+  @UseGuards(JwtAuthGuard, AllowScopes(['role:admin']))
   @Validate({
-    response: ProjectModelSchema,
-    request: [
-      {
-        name: 'projectId',
-        type: 'param',
-        schema: projectIdSchema
-      },
-      {
-        name: 'id',
-        type: 'param',
-        schema: idSchema
-      }
-    ]
+    response: ProjectResponseSchema,
+    request: [{ name: 'id', type: 'param', schema: idSchema }]
   })
-  async get(projectId: ProjectID, id: ID): Promise<ProjectModel> {
+  async get(id: ID): Promise<ProjectModel> {
     return await this.service.findById(id);
   }
 
   // UPDATE
   @Patch(':id')
+  @UseGuards(JwtAuthGuard, AllowScopes(['role:admin']))
   @Validate({
-    response: ProjectModelSchema,
+    response: ProjectResponseSchema,
     request: [
-      {
-        name: 'projectId',
-        type: 'param',
-        schema: projectIdSchema
-      },
-      {
-        name: 'id',
-        type: 'param',
-        schema: idSchema
-      },
-      {
-        type: 'body',
-        schema: UpdateProjectBodySchema
-      }
+      { name: 'id', type: 'param', schema: idSchema },
+      { name: 'version', type: 'query', schema: versionSchema },
+      { type: 'body', schema: UpdateProjectBodySchema }
     ]
   })
-  async update(projectId: ProjectID, id: ID, data: UpdateProjectBody): Promise<ProjectModel> {
-    return await this.service.update(id, data);
+  async update(id: ID, version: Version, data: UpdateProjectBody): Promise<ProjectModel> {
+    return await this.service.update(id, version, data);
   }
 
   // DELETE
   @Delete(':id')
+  @UseGuards(JwtAuthGuard, AllowScopes(['role:admin']))
   @Validate({
-    request: [
-      {
-        name: 'projectId',
-        type: 'param',
-        schema: projectIdSchema
-      },
-      {
-        name: 'id',
-        type: 'param',
-        schema: idSchema
-      }
-    ]
+    request: [{ name: 'id', type: 'param', schema: idSchema }]
   })
-  async delete(projectId: ProjectID, id: ID, @Res() res): Promise<void> {
+  async delete(id: ID, @Res() res): Promise<void> {
     await this.service.delete(id);
     return res.status(204).send();
   }

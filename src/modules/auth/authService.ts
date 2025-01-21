@@ -1,9 +1,9 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { UserService } from '../user/userService';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 
-import { CreateUserBody } from '../user/userService.interface';
+import { _IUserService, CreateUserBody } from '../user/userService.interface';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
@@ -13,8 +13,9 @@ export class AuthService {
   private aud: string;
   constructor(
     private configService: ConfigService,
-    private usersService: UserService,
-    private jwtService: JwtService
+    private jwtService: JwtService,
+    @Inject(_IUserService)
+    private usersService: UserService
   ) {
     this.iss = configService.get<string>('ISS');
     this.aud = configService.get<string>('AUD');

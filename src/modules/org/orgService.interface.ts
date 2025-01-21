@@ -9,14 +9,18 @@ export const OrgResponseSchema = OrgModelSchema;
 export type OrgResponse = Static<typeof OrgResponseSchema>;
 
 // CREATE
-export const CreateOrgBodySchema = Type.Omit(OrgModelSchema, ['id', 'ownerId', 'projects'], {
-  additionalProperties: false
-});
+export const CreateOrgBodySchema = Type.Omit(
+  OrgModelSchema,
+  ['id', 'ownerId', 'version', 'projects'],
+  {
+    additionalProperties: false
+  }
+);
 export type CreateOrgBody = Static<typeof CreateOrgBodySchema>;
 
 // UPDATE
 export const UpdateOrgBodySchema = Type.Partial(
-  Type.Omit(OrgModelSchema, ['id', 'ownerId', 'projects']),
+  Type.Omit(OrgModelSchema, ['id', 'ownerId', 'version', 'projects']),
   {
     additionalProperties: false
   }
@@ -27,4 +31,7 @@ export const UpdateOrgParamsSchema = Type.String();
 export type UpdateOrgParams = Static<typeof UpdateOrgParamsSchema>;
 
 // INTERFACE
-export interface IOrgService extends IService<OrgModel, CreateOrgBody, UpdateOrgBody> {}
+export interface IOrgService extends IService<OrgModel, CreateOrgBody, UpdateOrgBody> {
+  addProject(orgId: ID, projectId: ID): Promise<void>;
+  removeProject(orgId: ID, projectId: ID): Promise<void>;
+}

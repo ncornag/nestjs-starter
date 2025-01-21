@@ -2,7 +2,7 @@ import 'dotenv/config';
 import { NestFactory } from '@nestjs/core';
 import { Logger } from 'nestjs-pino';
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
-import ajvFormats from 'ajv-formats';
+// import ajvFormats from 'ajv-formats';
 import { AppModule, loggerConfig } from './appModule';
 import { configureNestJsTypebox } from 'nestjs-typebox';
 import fastifyRequestLogger from '@mgcrea/fastify-request-logger';
@@ -35,16 +35,16 @@ const FastifyModule = new FastifyAdapter({
   logger: loggerConfig,
   disableRequestLogging: true,
   genReqId: (req) => (req.headers['request-id'] as string) ?? nanoid(5),
-  requestIdHeader: 'request-id',
-  ajv: {
-    customOptions: {
-      removeAdditional: false,
-      coerceTypes: 'array',
-      useDefaults: true
-      //keywords: ['kind', 'modifier']
-    },
-    plugins: [ajvFormats]
-  }
+  requestIdHeader: 'request-id'
+  // ajv: {
+  //   customOptions: {
+  //     removeAdditional: false,
+  //     coerceTypes: 'array',
+  //     useDefaults: true
+  //     //keywords: ['kind', 'modifier']
+  //   },
+  //   plugins: [ajvFormats]
+  // }
 });
 
 async function bootstrap() {

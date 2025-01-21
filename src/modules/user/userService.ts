@@ -2,7 +2,7 @@ import { BadRequestException, Inject, Injectable, NotFoundException } from '@nes
 import { nanoid } from 'nanoid';
 import { PinoLogger } from 'nestjs-pino';
 import { UserModel } from './userModel';
-import { ID } from 'src/appModule.interfaces';
+import { ID, IDWithVersion, Version } from 'src/appModule.interfaces';
 import { IUserService, CreateUserBody, UpdateUserBody } from './userService.interface';
 import { IUserRepository, _IUserRepository } from './userRepository.interface';
 
@@ -15,13 +15,17 @@ export class UserService implements IUserService {
   ) {}
 
   // CREATE
-  async create(data: CreateUserBody): Promise<ID> {
-    const result = await this.repository.find({ username: data.username });
-    if (result.isOk() && result.value[0])
+  async create(data: CreateUserBody): Promise<IDWithVersion> {
+    // Verigy username
+    const unameResult = await this.repository.find({ username: data.username });
+    if (unameResult.isOk() && unameResult.value[0])
       throw new BadRequestException('Username already exists');
+    // Create the user
     const id = nanoid();
-    await this.repository.create({ id, ...data, roles: ['role:admin'] });
-    return id;
+    const result = await this.repository.create({ id, ...data, roles: ['role:admin'] });
+    if (result.isErr()) throw new BadRequestException(result.error);
+    // Return id data
+    return result.value;
   }
 
   // FIND
@@ -33,8 +37,8 @@ export class UserService implements IUserService {
   }
 
   // UPDATE
-  async update(id: ID, data: UpdateUserBody): Promise<UserModel> {
-    const result = await this.repository.updateOne({ id }, data);
+  async update(id: ID, version: Version, data: UpdateUserBody): Promise<UserModel> {
+    const result = await this.repository.updateOne({ id, version }, data);
     if (result.isErr()) throw result.error;
     return result.value;
   }

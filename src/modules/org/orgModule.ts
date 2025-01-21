@@ -10,7 +10,6 @@ import { _IOrgRepository } from './orgRepository.interface';
   imports: [DatabaseModule],
   controllers: [OrgController],
   providers: [
-    OrgService,
     {
       provide: _IOrgService,
       useClass: OrgService
@@ -20,6 +19,6 @@ import { _IOrgRepository } from './orgRepository.interface';
       useClass: OrgRepository
     }
   ],
-  exports: [OrgService]
+  exports: [_IOrgService]
 })
 export class OrgModule {}
