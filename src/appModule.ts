@@ -2,11 +2,11 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ProjectModule } from './modules/project/projectModule';
 import { UserModule } from './modules/user/userModule';
-import { DatabaseModule } from './infrastructure/databaseModule';
 import { LoggerModule } from 'nestjs-pino';
 import { AuthModule } from './modules/auth/authModule';
 import { OrgModule } from './modules/org/orgModule';
 import { ClsModule } from 'nestjs-cls';
+import { DatabaseModule } from './infrastructure/db/dbModule';
 
 export const loggerConfig = {
   level: process.env.LOG_LEVEL || 'info',
@@ -33,11 +33,11 @@ export const loggerConfig = {
       useExisting: true,
       pinoHttp: loggerConfig
     }),
-    DatabaseModule,
     ClsModule.forRoot({
       global: true,
       middleware: { mount: true }
     }),
+    DatabaseModule,
     AuthModule,
     UserModule,
     OrgModule,

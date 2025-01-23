@@ -4,18 +4,20 @@ import { IProjectRepository, _IProjectRepository } from './projectRepository.int
 import { Collection } from 'mongodb';
 import { Err, Ok, Result } from 'ts-results-es';
 import { IDWithVersion } from 'src/appModule.interfaces';
-import { DB, type DbEntity, toEntity, toDbEntity } from 'src/infrastructure/databaseModule';
-import { Value } from '@sinclair/typebox/value';
-import { mongoDiff } from 'src/infrastructure/mongoDiff';
+import { type DbEntity, toEntity, toDbEntity } from 'src/infrastructure/db/dbModule';
+import { mongoDiff } from 'src/infrastructure/db/mongoDiff';
+import { DbService } from 'src/infrastructure/db/dbService';
 
 @Injectable()
 export class ProjectRepository implements IProjectRepository {
   private col: Collection<DbEntity<ProjectModel>>;
 
   constructor(
-    @Inject('DB')
-    private db: DB
-  ) {
+    @Inject('DbService')
+    private db: DbService
+  ) {}
+
+  public async onModuleInit() {
     this.col = this.db.getDb().collection<DbEntity<ProjectModel>>('projects');
   }
 

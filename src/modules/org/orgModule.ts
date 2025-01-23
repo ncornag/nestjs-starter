@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
-import { DatabaseModule } from 'src/infrastructure/databaseModule';
 import { OrgController } from './orgController';
 import { OrgService } from './orgService';
 import { _IOrgService } from './orgService.interface';
 import { OrgRepository } from './orgRepository';
 import { _IOrgRepository } from './orgRepository.interface';
+import { DatabaseModule } from 'src/infrastructure/db/dbModule';
 
 @Module({
   imports: [DatabaseModule],

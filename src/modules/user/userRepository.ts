@@ -1,20 +1,23 @@
-import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { UserModel } from './userModel';
 import { IUserRepository } from './userRepository.interface';
 import { Collection } from 'mongodb';
 import { Err, Ok, Result } from 'ts-results-es';
 import { IDWithVersion } from 'src/appModule.interfaces';
-import { DB, type DbEntity, toEntity, toDbEntity } from 'src/infrastructure/databaseModule';
-import { mongoDiff } from 'src/infrastructure/mongoDiff';
+import { type DbEntity, toEntity, toDbEntity } from 'src/infrastructure/db/dbModule';
+import { mongoDiff } from 'src/infrastructure/db/mongoDiff';
+import { DbService } from 'src/infrastructure/db/dbService';
 
 @Injectable()
 export class UserRepository implements IUserRepository {
   private col: Collection<DbEntity<UserModel>>;
 
   constructor(
-    @Inject('DB')
-    private db: DB
-  ) {
+    @Inject('DbService')
+    private db: DbService
+  ) {}
+
+  public async onModuleInit() {
     this.col = this.db.getDb().collection<DbEntity<UserModel>>('users');
   }
 

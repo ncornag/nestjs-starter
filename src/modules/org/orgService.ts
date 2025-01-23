@@ -5,7 +5,7 @@ import {
   NotFoundException,
   NotImplementedException
 } from '@nestjs/common';
-import { nanoid } from 'nanoid';
+//import { nanoid } from 'nanoid';
 import { PinoLogger } from 'nestjs-pino';
 import { OrgModel } from './orgModel';
 import { ID, IDWithVersion, Version } from 'src/appModule.interfaces';
@@ -25,7 +25,7 @@ export class OrgService implements IOrgService {
   // CREATE
   async create(data: CreateOrgBody): Promise<IDWithVersion> {
     // Create the Org
-    const id = nanoid();
+    const id = Math.random().toString(); //nanoid();
     const ownerId = this.cls.get('user').id;
     const result = await this.repository.create({
       id,

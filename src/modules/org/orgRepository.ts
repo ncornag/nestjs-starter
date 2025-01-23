@@ -4,17 +4,21 @@ import { IOrgRepository, _IOrgRepository } from './orgRepository.interface';
 import { Collection } from 'mongodb';
 import { Err, Ok, Result } from 'ts-results-es';
 import { ID, IDWithVersion } from 'src/appModule.interfaces';
-import { DB, type DbEntity, toEntity, toDbEntity } from 'src/infrastructure/databaseModule';
-import { mongoDiff } from 'src/infrastructure/mongoDiff';
+import { type DbEntity, toEntity, toDbEntity } from 'src/infrastructure/db/dbModule';
+import { IDbService } from 'src/infrastructure/db/dbService.interface';
+import { mongoDiff } from 'src/infrastructure/db/mongoDiff';
+import { DbService } from 'src/infrastructure/db/dbService';
 
 @Injectable()
 export class OrgRepository implements IOrgRepository {
   private col: Collection<DbEntity<OrgModel>>;
 
   constructor(
-    @Inject('DB')
-    private db: DB
-  ) {
+    @Inject('DbService')
+    private db: DbService
+  ) {}
+
+  public async onModuleInit() {
     this.col = this.db.getDb().collection<DbEntity<OrgModel>>('orgs');
   }
 
