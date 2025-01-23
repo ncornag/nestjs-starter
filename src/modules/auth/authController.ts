@@ -20,8 +20,8 @@ export class AuthController {
     ]
   })
   async signup(data: CreateUserBody, @Res() res) {
-    const id = await this.authService.signUp(data);
-    return res.status(201).send({ id });
+    const idData = await this.authService.signUp(data);
+    return res.status(201).send(idData);
   }
 
   @UseGuards(LocalAuthGuard)

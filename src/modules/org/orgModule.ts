@@ -5,9 +5,11 @@ import { _IOrgService } from './orgService.interface';
 import { OrgRepository } from './orgRepository';
 import { _IOrgRepository } from './orgRepository.interface';
 import { DatabaseModule } from 'src/infrastructure/db/dbModule';
+import { JwtModule } from '@nestjs/jwt';
+import { AuthModule } from '../auth/authModule';
 
 @Module({
-  imports: [DatabaseModule],
+  imports: [AuthModule, DatabaseModule],
   controllers: [OrgController],
   providers: [
     {

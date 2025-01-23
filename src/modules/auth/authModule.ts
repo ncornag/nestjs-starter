@@ -1,30 +1,36 @@
 import * as fs from 'fs';
 import { Module } from '@nestjs/common';
-import { JwtModule } from '@nestjs/jwt';
+import { JwtModule, JwtService } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { UserModule } from '../user/userModule';
 import { AuthService } from './authService';
 import { AuthController } from './authController';
 import { LocalStrategy } from './localStrategy';
 import { JwtStrategy } from './jwtAuthStrategy';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
+    JwtModule,
     ConfigModule,
-    JwtModule.register({
-      privateKey: fs.readFileSync(process.env.PRIVATE_KEY_FILE, 'ascii'),
-      signOptions: {
-        expiresIn: '365d',
-        algorithm: 'RS256'
+    JwtModule.registerAsync({
+      useFactory: (config: ConfigService) => {
+        return {
+          privateKey: fs.readFileSync(config.get<string>('PRIVATE_KEY_FILE'), 'ascii'),
+          signOptions: {
+            expiresIn: '365d',
+            algorithm: 'RS256'
+          },
+          global: true
+        };
       },
-      global: true
+      inject: [ConfigService]
     }),
     UserModule,
     PassportModule
   ],
-  providers: [AuthService, LocalStrategy, JwtStrategy],
+  providers: [AuthService, LocalStrategy, JwtService, JwtStrategy, ConfigService],
   controllers: [AuthController],
-  exports: [AuthService]
+  exports: [AuthService, JwtService]
 })
 export class AuthModule {}

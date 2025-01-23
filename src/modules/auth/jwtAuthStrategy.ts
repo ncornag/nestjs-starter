@@ -3,14 +3,18 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable } from '@nestjs/common';
 import { ClsService } from 'nestjs-cls';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(private readonly cls: ClsService) {
+  constructor(
+    private readonly cls: ClsService,
+    private readonly config: ConfigService
+  ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: fs.readFileSync(process.env.PUBLIC_KEY_FILE, 'ascii')
+      secretOrKey: fs.readFileSync(config.get<string>('PUBLIC_KEY_FILE'), 'ascii')
     });
   }
 

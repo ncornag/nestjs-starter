@@ -30,6 +30,7 @@ export class UserService implements IUserService {
 
   // FIND
   async findById(id: ID): Promise<UserModel> {
+    console.log('service.findById', id);
     const result = await this.repository.find({ id });
     if (result.isErr()) throw result.error;
     if (!result.value[0]) throw new NotFoundException('User not found');

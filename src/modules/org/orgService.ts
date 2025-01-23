@@ -1,11 +1,5 @@
-import {
-  BadRequestException,
-  Inject,
-  Injectable,
-  NotFoundException,
-  NotImplementedException
-} from '@nestjs/common';
-//import { nanoid } from 'nanoid';
+import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { nanoid } from 'nanoid';
 import { PinoLogger } from 'nestjs-pino';
 import { OrgModel } from './orgModel';
 import { ID, IDWithVersion, Version } from 'src/appModule.interfaces';
@@ -24,8 +18,9 @@ export class OrgService implements IOrgService {
 
   // CREATE
   async create(data: CreateOrgBody): Promise<IDWithVersion> {
+    console.log('service.create', data);
     // Create the Org
-    const id = Math.random().toString(); //nanoid();
+    const id = nanoid();
     const ownerId = this.cls.get('user').id;
     const result = await this.repository.create({
       id,

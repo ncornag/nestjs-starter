@@ -50,9 +50,11 @@ export class DbService implements OnModuleInit, OnApplicationShutdown {
     });
     this.client.on('commandFailed', (event) => this.logger.warn('%s %o', this.dbIn, event));
 
+    const negativeFilterInterceptor = this.negativeFilterInterceptor;
+
     // Create Interceptor -- Create timestamp / version
     const createOne = function (collectionName: string, data: any) {
-      if (this.negativeFilterInterceptor[collectionName]) return data;
+      if (negativeFilterInterceptor[collectionName]) return data;
       // Add timestamp
       data.createdAt = new Date().toISOString();
       // Add version
@@ -68,7 +70,7 @@ export class DbService implements OnModuleInit, OnApplicationShutdown {
 
     // Update Interceptor -- Update timestamp / version
     const updateOne = function (this: any, collectionName: string, filter: any, update: any) {
-      if (this.negativeFilterInterceptor[collectionName]) return { filter, update };
+      if (negativeFilterInterceptor[collectionName]) return { filter, update };
       const set = update.$set || {};
       const inc = update.$inc || {};
       // Version management

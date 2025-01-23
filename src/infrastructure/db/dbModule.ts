@@ -2,6 +2,12 @@ import { Module } from '@nestjs/common';
 import { EnvModule } from '../env/envModule';
 import { ID } from 'src/appModule.interfaces';
 import { DbService } from './dbService';
+import { configureNestJsTypebox } from 'nestjs-typebox';
+
+configureNestJsTypebox({
+  patchSwagger: true,
+  setFormats: true
+});
 
 export type Entity = {
   id: ID;

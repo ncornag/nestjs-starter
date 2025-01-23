@@ -45,6 +45,7 @@ export class OrgController {
     ]
   })
   async create(data: CreateOrgBody, @Res() res): Promise<string> {
+    console.log('controller.create', data);
     const idData = await this.service.create(data);
     return res.status(201).send(idData);
   }

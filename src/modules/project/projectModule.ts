@@ -6,9 +6,10 @@ import { ProjectRepository } from './projectRepository';
 import { _IProjectRepository } from './projectRepository.interface';
 import { OrgModule } from '../org/orgModule';
 import { DatabaseModule } from 'src/infrastructure/db/dbModule';
+import { AuthModule } from '../auth/authModule';
 
 @Module({
-  imports: [OrgModule, DatabaseModule],
+  imports: [AuthModule, OrgModule, DatabaseModule],
   controllers: [ProjectController],
   providers: [
     {

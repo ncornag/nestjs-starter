@@ -2,9 +2,7 @@ import 'dotenv/config';
 import { NestFactory } from '@nestjs/core';
 import { Logger } from 'nestjs-pino';
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
-// import ajvFormats from 'ajv-formats';
 import { AppModule, loggerConfig } from './appModule';
-import { configureNestJsTypebox } from 'nestjs-typebox';
 import fastifyRequestLogger from '@mgcrea/fastify-request-logger';
 import { yellow } from 'kolorist';
 import helmet from 'helmet';
@@ -26,25 +24,11 @@ interface BigInt {
   return this.toString();
 };
 
-configureNestJsTypebox({
-  patchSwagger: true,
-  setFormats: true
-});
-
 const FastifyModule = new FastifyAdapter({
   logger: loggerConfig,
   disableRequestLogging: true,
   genReqId: (req) => (req.headers['request-id'] as string) ?? nanoid(5),
   requestIdHeader: 'request-id'
-  // ajv: {
-  //   customOptions: {
-  //     removeAdditional: false,
-  //     coerceTypes: 'array',
-  //     useDefaults: true
-  //     //keywords: ['kind', 'modifier']
-  //   },
-  //   plugins: [ajvFormats]
-  // }
 });
 
 async function bootstrap() {
@@ -52,6 +36,7 @@ async function bootstrap() {
     bufferLogs: true
   });
   app.setGlobalPrefix('api');
+  // (app as any).enableShutdwonHooks();
   await app.register(fastifyRequestLogger);
   const envService = app.get(EnvService);
   const appLogger = app.get(Logger);
