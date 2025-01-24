@@ -11,6 +11,7 @@ import {
 import { IProjectRepository, _IProjectRepository } from './projectRepository.interface';
 import { _IOrgService, IOrgService } from '../org/orgService.interface';
 import { ClsService } from 'nestjs-cls';
+import { NotModifiedException } from 'src/shared/exceptions';
 
 @Injectable()
 export class ProjectService implements IProjectService {
@@ -57,6 +58,7 @@ export class ProjectService implements IProjectService {
     const ownerId = this.cls.get('user').id;
     const result = await this.repository.updateOne({ id, version, ownerId }, data);
     if (result.isErr()) throw result.error;
+    if (version === result.value.version) throw new NotModifiedException();
     return result.value;
   }
 

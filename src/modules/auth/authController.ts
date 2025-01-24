@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Post, Request, Res, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpStatus,
+  Post,
+  Request,
+  Res,
+  UseGuards
+} from '@nestjs/common';
 import { LocalAuthGuard } from './localAuthGuard';
 import { AuthService } from './authService';
 import { Validate } from 'nestjs-typebox';
@@ -22,19 +31,19 @@ export class AuthController {
   })
   async signup(data: CreateUserBody, @Res() res) {
     const idData = await this.authService.signUp(data);
-    return res.status(201).send(idData);
+    return res.status(HttpStatus.CREATED).send(idData);
   }
 
   @UseGuards(LocalAuthGuard)
   @Post('login')
   async login(@Request() req, @Res() res) {
     const tokenData = await this.authService.login(req.user);
-    return res.status(200).send(tokenData);
+    return res.status(HttpStatus.OK).send(tokenData);
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('profile')
   async profile(@Request() req, @Res() res) {
-    return res.status(200).send(req.user);
+    return res.status(HttpStatus.OK).send(req.user);
   }
 }

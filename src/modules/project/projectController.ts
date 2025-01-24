@@ -1,4 +1,14 @@
-import { Get, Delete, Patch, Post, Controller, Inject, Res, UseGuards } from '@nestjs/common';
+import {
+  Get,
+  Delete,
+  Patch,
+  Post,
+  Controller,
+  Inject,
+  Res,
+  UseGuards,
+  HttpStatus
+} from '@nestjs/common';
 import { Validate } from 'nestjs-typebox';
 import {
   _IProjectService,
@@ -39,7 +49,7 @@ export class ProjectController {
   })
   async create(data: CreateProjectBody, @Res() res): Promise<IDWithVersion> {
     const idData = await this.service.create(data);
-    return res.status(201).send(idData);
+    return res.status(HttpStatus.CREATED).send(idData);
   }
 
   // GET
@@ -76,6 +86,6 @@ export class ProjectController {
   })
   async delete(id: ID, @Res() res): Promise<void> {
     await this.service.delete(id);
-    return res.status(204).send();
+    return res.status(HttpStatus.NO_CONTENT).send();
   }
 }

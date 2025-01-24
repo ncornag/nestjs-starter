@@ -7,7 +7,8 @@ import {
   Inject,
   Res,
   Request,
-  UseGuards
+  UseGuards,
+  HttpStatus
 } from '@nestjs/common';
 import { Validate } from 'nestjs-typebox';
 import {
@@ -46,9 +47,8 @@ export class OrgController {
     ]
   })
   async create(data: CreateOrgBody, @Res() res): Promise<string> {
-    console.log('controller.create', data);
     const idData = await this.service.create(data);
-    return res.status(201).send(idData);
+    return res.status(HttpStatus.CREATED).send(idData);
   }
 
   // GET
@@ -88,15 +88,12 @@ export class OrgController {
   @UseGuards(JwtAuthGuard, AllowScopes(ADMIN_CLAIMS))
   @Validate({
     request: [
-      {
-        name: 'id',
-        type: 'param',
-        schema: idSchema
-      }
+      { name: 'id', type: 'param', schema: idSchema },
+      { name: 'version', type: 'query', schema: versionSchema }
     ]
   })
-  async delete(id: ID, @Res() res): Promise<void> {
-    await this.service.delete(id);
-    return res.status(204).send();
+  async delete(id: ID, version: Version, @Res() res): Promise<void> {
+    await this.service.delete(id, version);
+    return res.status(HttpStatus.NO_CONTENT).send();
   }
 }

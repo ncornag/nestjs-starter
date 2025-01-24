@@ -40,7 +40,7 @@ export class OrgRepository implements IOrgRepository {
     const dbEntity = await this.col.findOne(toDbEntity<OrgModel>(where));
     if (!dbEntity) throw new NotFoundException('Org not found');
     const { ops, updated } = mongoDiff(dbEntity, data);
-    if (!ops) return Ok(toEntity<OrgModel>(dbEntity));
+    if (!ops) return Ok(toEntity<OrgModel>(updated));
     const updateResult = await this.col.updateOne(toDbEntity<OrgModel>(where), ops);
     if (updateResult.modifiedCount !== 1)
       return Err(new Error(`Modified count=${updateResult.modifiedCount}`));

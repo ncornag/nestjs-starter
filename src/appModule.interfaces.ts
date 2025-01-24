@@ -26,7 +26,7 @@ export interface IService<T, C, U> {
   create: (data: C) => Promise<IDWithVersion>;
   findById: (id: ID) => Promise<T>;
   update: (id: ID, version: Version, data: U) => Promise<T>;
-  delete: (id: ID) => Promise<void>;
+  delete: (id: ID, version: Version) => Promise<void>;
 }
 
 // GENERIC REPOSITORY

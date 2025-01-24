@@ -6,6 +6,7 @@ import { ID, IDWithVersion, Version } from 'src/appModule.interfaces';
 import { IOrgService, CreateOrgBody, UpdateOrgBody } from './orgService.interface';
 import { IOrgRepository, _IOrgRepository } from './orgRepository.interface';
 import { ClsService } from 'nestjs-cls';
+import { NotModifiedException } from 'src/shared/exceptions';
 
 @Injectable()
 export class OrgService implements IOrgService {
@@ -18,7 +19,6 @@ export class OrgService implements IOrgService {
 
   // CREATE
   async create(data: CreateOrgBody): Promise<IDWithVersion> {
-    console.log('service.create', data);
     // Create the Org
     const id = nanoid();
     const ownerId = this.cls.get('user').id;
@@ -45,18 +45,19 @@ export class OrgService implements IOrgService {
   async update(id: ID, version: Version, data: UpdateOrgBody): Promise<OrgModel> {
     const result = await this.repository.updateOne({ id, version }, data);
     if (result.isErr()) throw result.error;
+    if (version === result.value.version) throw new NotModifiedException();
     return result.value;
   }
 
   // DELETE
-  async delete(id: string): Promise<void> {
+  async delete(id: string, version: Version): Promise<void> {
     const ownerId = this.cls.get('user').id;
-    const result = await this.repository.find({ id, ownerId });
+    const result = await this.repository.find({ id, ownerId, version });
     if (result.isErr()) throw result.error;
     if (!result.value[0]) throw new NotFoundException('Org not found');
     if (result.value[0].projects.length)
       throw new BadRequestException("Can't delete an Org with Projects");
-    const deleteResult = await this.repository.deleteOne(id);
+    const deleteResult = await this.repository.deleteOne({ id, version });
     if (deleteResult.isErr()) throw deleteResult.error;
     return deleteResult.value;
   }
