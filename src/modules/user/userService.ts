@@ -6,6 +6,8 @@ import { ID, IDWithVersion, Version } from 'src/appModule.interfaces';
 import { IUserService, CreateUserBody, UpdateUserBody } from './userService.interface';
 import { IUserRepository, _IUserRepository } from './userRepository.interface';
 
+export const ADMIN_CLAIMS = ['role:admin'];
+
 @Injectable()
 export class UserService implements IUserService {
   constructor(
@@ -22,7 +24,7 @@ export class UserService implements IUserService {
       throw new BadRequestException('Username already exists');
     // Create the user
     const id = nanoid();
-    const result = await this.repository.create({ id, ...data, roles: ['role:admin'] });
+    const result = await this.repository.create({ id, ...data, roles: ADMIN_CLAIMS });
     if (result.isErr()) throw new BadRequestException(result.error);
     // Return id data
     return result.value;

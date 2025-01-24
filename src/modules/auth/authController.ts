@@ -4,6 +4,7 @@ import { AuthService } from './authService';
 import { Validate } from 'nestjs-typebox';
 import { CreateUserBody, CreateUserBodySchema } from '../user/userService.interface';
 import { idSchema } from 'src/appModule.interfaces';
+import { JwtAuthGuard } from './jwtAuthGuard';
 
 @Controller('auth')
 export class AuthController {
@@ -29,5 +30,11 @@ export class AuthController {
   async login(@Request() req, @Res() res) {
     const tokenData = await this.authService.login(req.user);
     return res.status(200).send(tokenData);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('profile')
+  async profile(@Request() req, @Res() res) {
+    return res.status(200).send(req.user);
   }
 }

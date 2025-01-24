@@ -23,6 +23,7 @@ import { OrgModel, OrgModelSchema } from './orgModel';
 import { idSchema, ID, Version, versionSchema } from 'src/appModule.interfaces';
 import { JwtAuthGuard } from '../auth/jwtAuthGuard';
 import { AllowScopes } from '../auth/scopesAuthGuard';
+import { ADMIN_CLAIMS } from '../user/userService';
 
 // CONTROLLER
 @Controller('orgs')
@@ -34,7 +35,7 @@ export class OrgController {
 
   // CREATE
   @Post()
-  @UseGuards(JwtAuthGuard, AllowScopes(['role:admin']))
+  @UseGuards(JwtAuthGuard, AllowScopes(ADMIN_CLAIMS))
   @Validate({
     response: idSchema,
     request: [
@@ -52,7 +53,7 @@ export class OrgController {
 
   // GET
   @Get(':id')
-  @UseGuards(JwtAuthGuard, AllowScopes(['role:admin']))
+  @UseGuards(JwtAuthGuard, AllowScopes(ADMIN_CLAIMS))
   @Validate({
     response: OrgResponseSchema,
     request: [
@@ -69,7 +70,7 @@ export class OrgController {
 
   // UPDATE
   @Patch(':id')
-  @UseGuards(JwtAuthGuard, AllowScopes(['role:admin']))
+  @UseGuards(JwtAuthGuard, AllowScopes(ADMIN_CLAIMS))
   @Validate({
     response: OrgModelSchema,
     request: [
@@ -84,7 +85,7 @@ export class OrgController {
 
   // DELETE
   @Delete(':id')
-  @UseGuards(JwtAuthGuard, AllowScopes(['role:admin']))
+  @UseGuards(JwtAuthGuard, AllowScopes(ADMIN_CLAIMS))
   @Validate({
     request: [
       {

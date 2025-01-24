@@ -8,17 +8,14 @@ import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
-  private saltRounds: number = 10;
-  private iss: string;
-  private aud: string;
+  private passSaltRounds: number;
   constructor(
     private configService: ConfigService,
     private jwtService: JwtService,
     @Inject(_IUserService)
     private usersService: UserService
   ) {
-    this.iss = configService.get<string>('ISS');
-    this.aud = configService.get<string>('AUD');
+    this.passSaltRounds = configService.get<number>('PASSWORD_SALT_ROUNDS');
   }
 
   // Used in the localStrategy
@@ -36,12 +33,12 @@ export class AuthService {
   }
 
   async signUp(data: CreateUserBody) {
-    const hash = await bcrypt.hash(data.password, this.saltRounds);
+    const hash = await bcrypt.hash(data.password, this.passSaltRounds);
     return this.usersService.create({ ...data, password: hash });
   }
 
   async login(user: any): Promise<{ access_token: string }> {
-    const payload = { iss: this.iss, aud: this.aud, sub: user.id, claims: [...user.roles] };
+    const payload = { sub: user.id, claims: [...user.roles] };
     return {
       access_token: this.jwtService.sign(payload)
     };

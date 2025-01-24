@@ -16,9 +16,11 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: (config: ConfigService) => ({
-        privateKey: fs.readFileSync(config.get<string>('PRIVATE_KEY_FILE'), 'ascii'),
+        privateKey: fs.readFileSync(config.getOrThrow<string>('PRIVATE_KEY_FILE'), 'ascii'),
         signOptions: {
-          expiresIn: config.getOrThrow<string>('ACCESS_TOKEN_VALIDITY_DURATION'),
+          issuer: config.getOrThrow<string>('TOKEN_ISS'),
+          audience: config.getOrThrow<string>('TOKEN_AUD'),
+          expiresIn: config.getOrThrow<string>('TOKEN_EXP'),
           algorithm: 'RS256'
         },
         global: true

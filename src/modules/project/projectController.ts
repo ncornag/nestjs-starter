@@ -20,6 +20,7 @@ import {
 } from 'src/appModule.interfaces';
 import { AllowScopes } from 'src/modules/auth/scopesAuthGuard';
 import { JwtAuthGuard } from '../auth/jwtAuthGuard';
+import { ADMIN_CLAIMS } from '../user/userService';
 
 // CONTROLLER
 @Controller('projects')
@@ -31,7 +32,7 @@ export class ProjectController {
 
   // CREATE
   @Post()
-  @UseGuards(JwtAuthGuard, AllowScopes(['role:admin']))
+  @UseGuards(JwtAuthGuard, AllowScopes(ADMIN_CLAIMS))
   @Validate({
     response: IDWithVersionSchema,
     request: [{ type: 'body', schema: CreateProjectBodySchema }]
@@ -43,7 +44,7 @@ export class ProjectController {
 
   // GET
   @Get(':id')
-  @UseGuards(JwtAuthGuard, AllowScopes(['role:admin']))
+  @UseGuards(JwtAuthGuard, AllowScopes(ADMIN_CLAIMS))
   @Validate({
     response: ProjectResponseSchema,
     request: [{ name: 'id', type: 'param', schema: idSchema }]
@@ -54,7 +55,7 @@ export class ProjectController {
 
   // UPDATE
   @Patch(':id')
-  @UseGuards(JwtAuthGuard, AllowScopes(['role:admin']))
+  @UseGuards(JwtAuthGuard, AllowScopes(ADMIN_CLAIMS))
   @Validate({
     response: ProjectResponseSchema,
     request: [
@@ -69,7 +70,7 @@ export class ProjectController {
 
   // DELETE
   @Delete(':id')
-  @UseGuards(JwtAuthGuard, AllowScopes(['role:admin']))
+  @UseGuards(JwtAuthGuard, AllowScopes(ADMIN_CLAIMS))
   @Validate({
     request: [{ name: 'id', type: 'param', schema: idSchema }]
   })

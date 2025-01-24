@@ -18,7 +18,8 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:debug-e2e": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand --config ./test/jest.config.e2e.ts",
-    "test:e2e": "clear; jest --config ./test/jest.config.e2e.ts"
+    "test:e2e": "clear; jest --config ./test/jest.config.e2e.ts --runInBand",
+    "test:e2e:watch": "clear; jest --watch --config ./test/jest.config.e2e.ts --runInBand"
   },
   "dependencies": {
     "@fastify/static": "^7.0.4",
