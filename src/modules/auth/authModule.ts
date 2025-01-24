@@ -11,26 +11,25 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
-    JwtModule,
+    //JwtModule,
     ConfigModule,
     JwtModule.registerAsync({
-      useFactory: (config: ConfigService) => {
-        return {
-          privateKey: fs.readFileSync(config.get<string>('PRIVATE_KEY_FILE'), 'ascii'),
-          signOptions: {
-            expiresIn: '365d',
-            algorithm: 'RS256'
-          },
-          global: true
-        };
-      },
+      imports: [ConfigModule],
+      useFactory: (config: ConfigService) => ({
+        privateKey: fs.readFileSync(config.get<string>('PRIVATE_KEY_FILE'), 'ascii'),
+        signOptions: {
+          expiresIn: config.getOrThrow<string>('ACCESS_TOKEN_VALIDITY_DURATION'),
+          algorithm: 'RS256'
+        },
+        global: true
+      }),
       inject: [ConfigService]
     }),
     UserModule,
     PassportModule
   ],
-  providers: [AuthService, LocalStrategy, JwtService, JwtStrategy, ConfigService],
+  providers: [AuthService, LocalStrategy, JwtStrategy],
   controllers: [AuthController],
-  exports: [AuthService, JwtService]
+  exports: [AuthService, JwtModule]
 })
 export class AuthModule {}
