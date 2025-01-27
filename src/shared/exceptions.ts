@@ -1,7 +1,8 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
 
+export const NOT_MODIFIED = 'NotModified';
 export class NotModifiedException extends HttpException {
   constructor() {
-    super('NotModified', HttpStatus.NOT_MODIFIED);
+    super(NOT_MODIFIED, HttpStatus.NOT_MODIFIED);
   }
 }

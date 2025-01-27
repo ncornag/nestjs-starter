@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { nanoid } from 'nanoid';
 import { PinoLogger } from 'nestjs-pino';
 import { OrgModel } from './orgModel';
@@ -7,6 +7,7 @@ import { IOrgService, CreateOrgBody, UpdateOrgBody } from './orgService.interfac
 import { IOrgRepository, _IOrgRepository } from './orgRepository.interface';
 import { ClsService } from 'nestjs-cls';
 import { NotModifiedException } from 'src/shared/exceptions';
+import { OrgNotFoundException, OrgWithProjectsException } from './orgExceptions';
 
 @Injectable()
 export class OrgService implements IOrgService {
@@ -37,7 +38,7 @@ export class OrgService implements IOrgService {
     const ownerId = this.cls.get('user').id;
     const result = await this.repository.find({ id, ownerId });
     if (result.isErr()) throw result.error;
-    if (!result.value[0]) throw new NotFoundException('Org not found');
+    if (!result.value[0]) throw new OrgNotFoundException();
     return result.value[0];
   }
 
@@ -54,10 +55,9 @@ export class OrgService implements IOrgService {
     const ownerId = this.cls.get('user').id;
     const result = await this.repository.find({ id, ownerId, version });
     if (result.isErr()) throw result.error;
-    if (!result.value[0]) throw new NotFoundException('Org not found');
-    if (result.value[0].projects.length)
-      throw new BadRequestException("Can't delete an Org with Projects");
-    const deleteResult = await this.repository.deleteOne({ id, version });
+    if (!result.value[0]) throw new OrgNotFoundException();
+    if (result.value[0].projects.length) throw new OrgWithProjectsException();
+    const deleteResult = await this.repository.deleteOne({ id, version, ownerId });
     if (deleteResult.isErr()) throw deleteResult.error;
     return deleteResult.value;
   }

@@ -7,7 +7,9 @@ import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify
 import { DbService } from 'src/infrastructure/db/dbService';
 import { JwtService } from '@nestjs/jwt';
 import { ADMIN_CLAIMS } from '../user/userService';
-import { HttpCode, HttpStatus } from '@nestjs/common';
+import { HttpStatus } from '@nestjs/common';
+import { ORG_NOT_FOUND } from './orgExceptions';
+import { NOT_MODIFIED } from 'src/shared/exceptions';
 
 const clearCollections = async (dbService: DbService) => {
   const collections = await dbService.client.db().listCollections().toArray();
@@ -141,6 +143,7 @@ describe('OrgController (e2e)', () => {
         headers: { authorization: `Bearer ${adminToken}` }
       });
       expect(result.statusCode).toEqual(HttpStatus.NOT_FOUND);
+      expect(result.json().message).toEqual(ORG_NOT_FOUND);
     });
   });
 
@@ -184,6 +187,7 @@ describe('OrgController (e2e)', () => {
         headers: { authorization: `Bearer ${adminToken}` }
       });
       expect(result.statusCode).toEqual(HttpStatus.NOT_FOUND);
+      expect(result.json().message).toEqual(ORG_NOT_FOUND);
     });
 
     it('should not update if nothing changes', async () => {
@@ -195,6 +199,7 @@ describe('OrgController (e2e)', () => {
         headers: { authorization: `Bearer ${adminToken}` }
       });
       expect(result.statusCode).toEqual(HttpStatus.NOT_MODIFIED);
+      expect(result.json().message).toEqual(NOT_MODIFIED);
     });
   });
 

@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { nanoid } from 'nanoid';
 import { PinoLogger } from 'nestjs-pino';
 import { ProjectModel } from './projectModel';
@@ -12,6 +12,7 @@ import { IProjectRepository, _IProjectRepository } from './projectRepository.int
 import { _IOrgService, IOrgService } from '../org/orgService.interface';
 import { ClsService } from 'nestjs-cls';
 import { NotModifiedException } from 'src/shared/exceptions';
+import { DuplicateKeyException, ProjectNotFoundException } from './projectExceptions';
 
 @Injectable()
 export class ProjectService implements IProjectService {
@@ -28,11 +29,9 @@ export class ProjectService implements IProjectService {
   async create(data: CreateProjectBody): Promise<IDWithVersion> {
     // Validate key
     const projectResult = await this.repository.find({ key: data.key });
-    if (projectResult.isOk() && projectResult.value[0])
-      throw new BadRequestException('Project key already exists');
+    if (projectResult.isOk() && projectResult.value[0]) throw new DuplicateKeyException();
     // Validate Org
     const org = await this.orgService.findById(data.orgId);
-    if (!org) throw new BadRequestException('Org not found');
     // Create the Project
     const id = nanoid();
     const ownerId = this.cls.get('user').id;
@@ -49,7 +48,7 @@ export class ProjectService implements IProjectService {
     const ownerId = this.cls.get('user').id;
     const result = await this.repository.find({ id, ownerId });
     if (result.isErr()) throw result.error;
-    if (!result.value[0]) throw new NotFoundException('Project not found');
+    if (!result.value[0]) throw new ProjectNotFoundException();
     return result.value[0];
   }
 
