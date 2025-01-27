@@ -63,18 +63,12 @@ export class ProjectService implements IProjectService {
   }
 
   // DELETE
-  async delete(id: string): Promise<void> {
-    const result = await this.repository.deleteOne({ id, ownerId });
+  async delete(id: string, version: Version): Promise<void> {
     const ownerId = this.cls.get(USER).id;
+    const result = await this.repository.deleteOne({ id, version, ownerId });
     if (result.isErr()) throw result.error;
+    // Delete the Project from the Org
+    await this.orgService.removeProject(id, ownerId);
     return result.value;
-  }
-
-  // FIND BY KEY
-  async findByKey(key: string): Promise<ProjectModel | undefined> {
-    const result = await this.repository.find({ key });
-    if (result.isErr()) throw result.error;
-    if (!result.value[0]) throw new NotFoundException('Project not found');
-    return result.value[0];
   }
 }

@@ -45,7 +45,8 @@ export class OrgService implements IOrgService {
 
   // UPDATE
   async update(id: ID, version: Version, data: UpdateOrgBody): Promise<OrgModel> {
-    const result = await this.repository.updateOne({ id, version }, data);
+    const ownerId = this.cls.get(USER).id;
+    const result = await this.repository.updateOne({ id, version, ownerId }, data);
     if (result.isErr()) throw result.error;
     if (version === result.value.version) throw new NotModifiedException();
     return result.value;
@@ -65,14 +66,16 @@ export class OrgService implements IOrgService {
 
   // ADD PROJECT
   async addProject(orgId: ID, projectId: ID): Promise<void> {
-    const result = await this.repository.addProject(orgId, projectId);
+    const ownerId = this.cls.get(USER).id;
+    const result = await this.repository.addProject(projectId, ownerId, orgId);
     if (result.isErr()) throw result.error;
     return;
   }
 
   // REMOVE PROJECT
-  async removeProject(orgId: ID, projectId: ID): Promise<void> {
-    const result = await this.repository.removeProject(orgId, projectId);
+  async removeProject(projectId: ID): Promise<void> {
+    const ownerId = this.cls.get(USER).id;
+    const result = await this.repository.removeProject(projectId, ownerId);
     if (result.isErr()) throw result.error;
     return;
   }

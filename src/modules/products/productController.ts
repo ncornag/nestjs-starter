@@ -104,7 +104,7 @@ export class ProductController {
     ]
   })
   async delete(projectId: ProjectID, id: ID, @Res() res): Promise<void> {
-    await this.service.delete(id);
+    await this.service.delete(id, 0);
     return res.status(204).send();
   }
 }

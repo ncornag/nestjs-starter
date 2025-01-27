@@ -82,10 +82,13 @@ export class ProjectController {
   @Delete(':id')
   @UseGuards(JwtAuthGuard, AllowScopes(ADMIN_CLAIMS))
   @Validate({
-    request: [{ name: 'id', type: 'param', schema: idSchema }]
+    request: [
+      { name: 'id', type: 'param', schema: idSchema },
+      { name: 'version', type: 'query', schema: versionSchema }
+    ]
   })
-  async delete(id: ID, @Res() res): Promise<void> {
-    await this.service.delete(id);
+  async delete(id: ID, version: Version, @Res() res): Promise<void> {
+    await this.service.delete(id, version);
     return res.status(HttpStatus.NO_CONTENT).send();
   }
 }

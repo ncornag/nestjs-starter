@@ -5,6 +5,6 @@ import { Result } from 'ts-results-es';
 export const _IOrgRepository = 'IOrgRepository';
 
 export interface IOrgRepository extends IRepository<OrgModel> {
-  addProject(orgId: ID, projectId: ID): Promise<Result<undefined, Error>>;
-  removeProject(orgId: ID, projectId: ID): Promise<Result<undefined, Error>>;
+  addProject(projectId: ID, orgId: ID, ownerId: ID): Promise<Result<undefined, Error>>;
+  removeProject(projectId: ID, ownerId: ID): Promise<Result<undefined, Error>>;
 }

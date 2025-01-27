@@ -34,6 +34,4 @@ export type UpdateProjectParams = Static<typeof UpdateProjectParamsSchema>;
 
 // INTERFACE
 export interface IProjectService
-  extends IService<ProjectModel, CreateProjectBody, UpdateProjectBody> {
-  findByKey(key: string): Promise<ProjectModel | undefined>;
-}
+  extends IService<ProjectModel, CreateProjectBody, UpdateProjectBody> {}

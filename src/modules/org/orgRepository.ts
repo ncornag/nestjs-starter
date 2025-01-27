@@ -5,7 +5,6 @@ import { Collection } from 'mongodb';
 import { Err, Ok, Result } from 'ts-results-es';
 import { ID, IDWithVersion } from 'src/appModule.interfaces';
 import { type DbEntity, toEntity, toDbEntity } from 'src/infrastructure/db/dbModule';
-import { IDbService } from 'src/infrastructure/db/dbService.interface';
 import { mongoDiff } from 'src/infrastructure/db/mongoDiff';
 import { DbService } from 'src/infrastructure/db/dbService';
 
@@ -56,9 +55,9 @@ export class OrgRepository implements IOrgRepository {
   }
 
   // ADD PROJECT
-  async addProject(orgId: ID, projectId: ID): Promise<Result<undefined, Error>> {
+  async addProject(projectId: ID, ownerId: ID, orgId: ID): Promise<Result<undefined, Error>> {
     const updateResult = await this.col.updateOne(
-      { _id: orgId, version: { $gte: 0 } },
+      { _id: orgId, ownerId, version: { $gte: 0 } },
       { $push: { projects: projectId } }
     );
     if (updateResult.modifiedCount !== 1)
@@ -67,9 +66,9 @@ export class OrgRepository implements IOrgRepository {
   }
 
   // REMOVE PROJECT
-  async removeProject(orgId: ID, projectId: ID): Promise<Result<undefined, Error>> {
+  async removeProject(projectId: ID, ownerId: ID): Promise<Result<undefined, Error>> {
     const updateResult = await this.col.updateOne(
-      { _id: orgId },
+      { projects: projectId, ownerId, version: { $gte: 0 } },
       { $pull: { projects: projectId } }
     );
     if (updateResult.modifiedCount !== 1)
