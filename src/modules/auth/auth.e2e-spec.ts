@@ -12,9 +12,11 @@ import { HttpStatus } from '@nestjs/common';
 
 const clearCollections = async (dbService: DbService) => {
   const collections = await dbService.client.db().listCollections().toArray();
-  collections.forEach(async (col) => {
-    await dbService.client.db().collection(col.name).deleteMany({});
-  });
+  await Promise.all(
+    collections.map(async (col) => {
+      const result = await dbService.client.db().collection(col.name).deleteMany({});
+    })
+  );
 };
 
 describe('AuthController (e2e)', () => {
