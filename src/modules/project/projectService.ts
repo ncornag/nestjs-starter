@@ -13,6 +13,7 @@ import { _IOrgService, IOrgService } from '../org/orgService.interface';
 import { ClsService } from 'nestjs-cls';
 import { NotModifiedException } from 'src/shared/exceptions';
 import { DuplicateKeyException, ProjectNotFoundException } from './projectExceptions';
+import { USER } from '../auth/authService';
 
 @Injectable()
 export class ProjectService implements IProjectService {
@@ -34,7 +35,7 @@ export class ProjectService implements IProjectService {
     const org = await this.orgService.findById(data.orgId);
     // Create the Project
     const id = nanoid();
-    const ownerId = this.cls.get('user').id;
+    const ownerId = this.cls.get(USER).id;
     const result = await this.repository.create({ id, ownerId, ...data });
     if (result.isErr()) throw new BadRequestException(result.error);
     // Add the Project to the Org
@@ -45,7 +46,7 @@ export class ProjectService implements IProjectService {
 
   // FIND
   async findById(id: ID): Promise<ProjectModel> {
-    const ownerId = this.cls.get('user').id;
+    const ownerId = this.cls.get(USER).id;
     const result = await this.repository.find({ id, ownerId });
     if (result.isErr()) throw result.error;
     if (!result.value[0]) throw new ProjectNotFoundException();
@@ -54,7 +55,7 @@ export class ProjectService implements IProjectService {
 
   // UPDATE
   async update(id: ID, version: Version, data: UpdateProjectBody): Promise<ProjectModel> {
-    const ownerId = this.cls.get('user').id;
+    const ownerId = this.cls.get(USER).id;
     const result = await this.repository.updateOne({ id, version, ownerId }, data);
     if (result.isErr()) throw result.error;
     if (version === result.value.version) throw new NotModifiedException();
@@ -63,8 +64,8 @@ export class ProjectService implements IProjectService {
 
   // DELETE
   async delete(id: string): Promise<void> {
-    const ownerId = this.cls.get('user').id;
     const result = await this.repository.deleteOne({ id, ownerId });
+    const ownerId = this.cls.get(USER).id;
     if (result.isErr()) throw result.error;
     return result.value;
   }

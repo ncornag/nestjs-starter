@@ -6,6 +6,8 @@ import * as bcrypt from 'bcrypt';
 import { _IUserService, CreateUserBody } from '../user/userService.interface';
 import { ConfigService } from '@nestjs/config';
 
+export const USER = 'user';
+
 @Injectable()
 export class AuthService {
   private passSaltRounds: number;

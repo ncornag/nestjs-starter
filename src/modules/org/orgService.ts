@@ -8,6 +8,7 @@ import { IOrgRepository, _IOrgRepository } from './orgRepository.interface';
 import { ClsService } from 'nestjs-cls';
 import { NotModifiedException } from 'src/shared/exceptions';
 import { OrgNotFoundException, OrgWithProjectsException } from './orgExceptions';
+import { USER } from '../auth/authService';
 
 @Injectable()
 export class OrgService implements IOrgService {
@@ -22,7 +23,7 @@ export class OrgService implements IOrgService {
   async create(data: CreateOrgBody): Promise<IDWithVersion> {
     // Create the Org
     const id = nanoid();
-    const ownerId = this.cls.get('user').id;
+    const ownerId = this.cls.get(USER).id;
     const result = await this.repository.create({
       id,
       ownerId,
@@ -35,7 +36,7 @@ export class OrgService implements IOrgService {
 
   // FIND
   async findById(id: ID): Promise<OrgModel> {
-    const ownerId = this.cls.get('user').id;
+    const ownerId = this.cls.get(USER).id;
     const result = await this.repository.find({ id, ownerId });
     if (result.isErr()) throw result.error;
     if (!result.value[0]) throw new OrgNotFoundException();
@@ -52,7 +53,7 @@ export class OrgService implements IOrgService {
 
   // DELETE
   async delete(id: string, version: Version): Promise<void> {
-    const ownerId = this.cls.get('user').id;
+    const ownerId = this.cls.get(USER).id;
     const result = await this.repository.find({ id, ownerId, version });
     if (result.isErr()) throw result.error;
     if (!result.value[0]) throw new OrgNotFoundException();

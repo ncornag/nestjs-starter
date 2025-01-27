@@ -4,6 +4,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Injectable } from '@nestjs/common';
 import { ClsService } from 'nestjs-cls';
 import { ConfigService } from '@nestjs/config';
+import { USER } from './authService';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -23,7 +24,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     // TODO Validate user exists and is still valid?
     // TODO Enrich the user object?
     const userData = { id: payload.sub, claims: payload.claims };
-    this.cls.set('user', userData);
+    this.cls.set(USER, userData);
     return userData;
   }
 }

@@ -9,6 +9,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { Reflector } from '@nestjs/core';
 import { ClsService } from 'nestjs-cls';
+import { USER } from './authService';
 
 export const PROJECT_SCOPED = 'projectScoped';
 export const PROJECT_TAG = 'project';
@@ -27,7 +28,7 @@ export const AllowScopes = (scopes: string[] | string): Type<CanActivate> => {
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
       try {
-        const user = this.cls.get('user');
+        const user = this.cls.get(USER);
         const request = context.switchToHttp().getRequest();
         // Check project claim
         if (this.routeExpectedClaims.find((s) => s === PROJECT_SCOPED) !== undefined) {
