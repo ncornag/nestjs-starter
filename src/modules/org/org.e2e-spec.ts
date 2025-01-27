@@ -83,14 +83,11 @@ describe('OrgController (e2e)', () => {
       });
       expect(result.statusCode).toEqual(HttpStatus.CREATED);
       createdIdData = result.json();
-    });
-
-    it('should be in the database', async () => {
-      const record = await dbService.client
+      const orgRecord = await dbService.client
         .db()
         .collection('orgs')
         .findOne({ _id: createdIdData.id, ownerId: user.id });
-      expect({ ...record, createdAt: new Date(record.createdAt) }).toEqual({
+      expect({ ...orgRecord, createdAt: new Date(orgRecord.createdAt) }).toEqual({
         _id: createdIdData.id,
         version: createdIdData.version,
         name: orgData.name,
@@ -250,9 +247,6 @@ describe('OrgController (e2e)', () => {
         headers: { authorization: `Bearer ${adminToken}` }
       });
       expect(result.statusCode).toEqual(HttpStatus.NO_CONTENT);
-    });
-
-    it('should not be in the database', async () => {
       const record = await dbService.client
         .db()
         .collection('orgs')
