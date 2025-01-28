@@ -1,9 +1,9 @@
-import { HttpException, HttpStatus } from '@nestjs/common';
+import { HttpException, HttpStatus, NotFoundException } from '@nestjs/common';
 
 export const ORG_NOT_FOUND = 'Org not found';
-export class OrgNotFoundException extends HttpException {
+export class OrgNotFoundException extends NotFoundException {
   constructor() {
-    super(ORG_NOT_FOUND, HttpStatus.NOT_FOUND);
+    super(ORG_NOT_FOUND);
   }
 }
 

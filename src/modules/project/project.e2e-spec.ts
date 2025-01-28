@@ -14,7 +14,7 @@ import { ProjectModule } from './projectModule';
 import { OrgModule } from '../org/orgModule';
 import { PROJECT_DUPLICATE_KEY, PROJECT_NOT_FOUND } from './projectExceptions';
 import { ORG_NOT_FOUND } from '../org/orgExceptions';
-import { NOT_MODIFIED } from 'src/shared/exceptions';
+import { NOT_MODIFIED, VALIDATION_FAILED } from 'src/shared/exceptions';
 
 const clearCollections = async (dbService: DbService) => {
   const collections = await dbService.client.db().listCollections().toArray();
@@ -150,8 +150,9 @@ describe('ProjectController (e2e)', () => {
         body: { ...projectData, key: '123', orgId: '3' },
         headers: { authorization: `Bearer ${adminToken}` }
       });
-      expect(result.statusCode).toEqual(HttpStatus.NOT_FOUND);
-      expect(result.json().message).toEqual(ORG_NOT_FOUND);
+      expect(result.statusCode).toEqual(HttpStatus.BAD_REQUEST);
+      expect(result.json().message).toEqual(VALIDATION_FAILED);
+      expect(result.json().errors).toEqual([{ message: ORG_NOT_FOUND }]);
     });
   });
 

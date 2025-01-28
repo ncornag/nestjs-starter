@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { nanoid } from 'nanoid';
 import { PinoLogger } from 'nestjs-pino';
 import { ProjectModel } from './projectModel';
@@ -11,9 +11,10 @@ import {
 import { IProjectRepository, _IProjectRepository } from './projectRepository.interface';
 import { _IOrgService, IOrgService } from '../org/orgService.interface';
 import { ClsService } from 'nestjs-cls';
-import { NotModifiedException } from 'src/shared/exceptions';
+import { NotModifiedException, ValidationException } from 'src/shared/exceptions';
 import { DuplicateKeyException, ProjectNotFoundException } from './projectExceptions';
 import { USER } from '../auth/authService';
+import { OrgNotFoundException } from '../org/orgExceptions';
 
 @Injectable()
 export class ProjectService implements IProjectService {
@@ -31,8 +32,15 @@ export class ProjectService implements IProjectService {
     // Validate key
     const projectResult = await this.repository.find({ key: data.key });
     if (projectResult.isOk() && projectResult.value[0]) throw new DuplicateKeyException();
-    // Validate Org
-    const org = await this.orgService.findById(data.orgId);
+    // Validate Org, converting the 404 to a 400 Validation failed error
+    let org;
+    try {
+      org = await this.orgService.findById(data.orgId);
+    } catch (e) {
+      if (e instanceof NotFoundException)
+        throw new ValidationException([{ message: e.message }]);
+      throw e;
+    }
     // Create the Project
     const id = nanoid();
     const ownerId = this.cls.get(USER).id;
