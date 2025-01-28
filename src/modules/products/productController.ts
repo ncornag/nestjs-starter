@@ -9,7 +9,14 @@ import {
   UpdateProjectBody
 } from '../project/projectService.interface';
 import { ProjectModel, ProjectModelSchema } from '../project/projectModel';
-import { idSchema, ID, projectIdSchema, ProjectID } from 'src/appModule.interfaces';
+import {
+  idSchema,
+  ID,
+  projectIdSchema,
+  ProjectID,
+  IDWithVersionSchema,
+  IDWithVersion
+} from 'src/appModule.interfaces';
 import { AllowScopes } from 'src/modules/auth/scopesAuthGuard';
 
 // CONTROLLER
@@ -23,7 +30,7 @@ export class ProductController {
   // @UseGuards(AllowScopes('catalog:write'))
   @Post()
   @Validate({
-    response: idSchema,
+    response: IDWithVersionSchema,
     request: [
       {
         name: 'projectId',
@@ -36,9 +43,14 @@ export class ProductController {
       }
     ]
   })
-  async create(projectId: ProjectID, data: CreateProjectBody, @Res() res): Promise<string> {
+  async create(
+    projectId: ProjectID,
+    data: CreateProjectBody,
+    @Res({ passthrough: true }) res
+  ): Promise<IDWithVersion> {
     const idData = await this.service.create(data);
-    return await res.status(201).send(idData);
+    res.status(201);
+    return idData;
   }
 
   // GET
@@ -103,8 +115,9 @@ export class ProductController {
       }
     ]
   })
-  async delete(projectId: ProjectID, id: ID, @Res() res): Promise<void> {
+  async delete(projectId: ProjectID, id: ID, @Res({ passthrough: true }) res): Promise<void> {
     await this.service.delete(id, 0);
-    return await res.status(204).send();
+    res.status(204);
+    return;
   }
 }

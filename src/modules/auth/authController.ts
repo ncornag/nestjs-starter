@@ -12,7 +12,7 @@ import { LocalAuthGuard } from './localAuthGuard';
 import { AuthService } from './authService';
 import { Validate } from 'nestjs-typebox';
 import { CreateUserBody, CreateUserBodySchema } from '../user/userService.interface';
-import { idSchema } from 'src/appModule.interfaces';
+import { idSchema, IDWithVersionSchema } from 'src/appModule.interfaces';
 import { JwtAuthGuard } from './jwtAuthGuard';
 
 @Controller('auth')
@@ -21,7 +21,7 @@ export class AuthController {
 
   @Post('signup')
   @Validate({
-    response: idSchema,
+    response: IDWithVersionSchema,
     request: [
       {
         type: 'body',
@@ -29,21 +29,24 @@ export class AuthController {
       }
     ]
   })
-  async signup(data: CreateUserBody, @Res() res) {
+  async signup(data: CreateUserBody, @Res({ passthrough: true }) res) {
     const idData = await this.authService.signUp(data);
-    return await res.status(HttpStatus.CREATED).send(idData);
+    res.status(HttpStatus.CREATED);
+    return idData;
   }
 
   @UseGuards(LocalAuthGuard)
   @Post('login')
-  async login(@Request() req, @Res() res) {
+  async login(@Request() req, @Res({ passthrough: true }) res) {
     const tokenData = await this.authService.login(req.user);
-    return await res.status(HttpStatus.OK).send(tokenData);
+    res.status(HttpStatus.OK);
+    return tokenData;
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('profile')
-  async profile(@Request() req, @Res() res) {
-    return await res.status(HttpStatus.OK).send(req.user);
+  async profile(@Request() req, @Res({ passthrough: true }) res) {
+    res.status(HttpStatus.OK);
+    return req.user;
   }
 }

@@ -47,9 +47,13 @@ export class ProjectController {
     response: IDWithVersionSchema,
     request: [{ type: 'body', schema: CreateProjectBodySchema }]
   })
-  async create(data: CreateProjectBody, @Res() res): Promise<IDWithVersion> {
+  async create(
+    data: CreateProjectBody,
+    @Res({ passthrough: true }) res
+  ): Promise<IDWithVersion> {
     const idData = await this.service.create(data);
-    return await res.status(HttpStatus.CREATED).send(idData);
+    res.status(HttpStatus.CREATED);
+    return idData;
   }
 
   // GET
@@ -87,8 +91,9 @@ export class ProjectController {
       { name: 'version', type: 'query', schema: versionSchema }
     ]
   })
-  async delete(id: ID, version: Version, @Res() res): Promise<void> {
+  async delete(id: ID, version: Version, @Res({ passthrough: true }) res): Promise<void> {
     await this.service.delete(id, version);
-    return await res.status(HttpStatus.NO_CONTENT).send();
+    res.status(HttpStatus.NO_CONTENT);
+    return;
   }
 }
