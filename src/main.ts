@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { NestFactory } from '@nestjs/core';
+import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import { Logger } from 'nestjs-pino';
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
 import { AppModule, loggerConfig } from './appModule';
@@ -10,6 +10,7 @@ import helmet from 'helmet';
 import { customAlphabet } from 'nanoid';
 import { SwaggerRunner } from './shared/swagger/swagger-runner';
 import { EnvService } from './infrastructure/env/envService';
+import { CatchEverythingFilter } from './shared/exceptions';
 const nanoid = customAlphabet(
   'useandom-26T198340PX75pxJACKVERYMINDBUSHWOLFGQZbfghjklqvwyzrict',
   5
@@ -35,18 +36,13 @@ async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, FastifyModule, {
     bufferLogs: true
   });
-  app.setGlobalPrefix('api');
-  // (app as any).enableShutdwonHooks();
   await app.register(fastifyRequestLogger);
   const envService = app.get(EnvService);
   const appLogger = app.get(Logger);
+  app.setGlobalPrefix('api');
+  app.useGlobalFilters(new CatchEverythingFilter(app.get(HttpAdapterHost)));
   app.useLogger(appLogger);
-
-  app.use(
-    helmet({
-      xPoweredBy: false
-    })
-  );
+  app.use(helmet({ xPoweredBy: false }));
   app.use(helmet.hidePoweredBy());
   app.enableCors();
 
