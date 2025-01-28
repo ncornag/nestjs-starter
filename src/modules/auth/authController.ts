@@ -31,19 +31,19 @@ export class AuthController {
   })
   async signup(data: CreateUserBody, @Res() res) {
     const idData = await this.authService.signUp(data);
-    return res.status(HttpStatus.CREATED).send(idData);
+    return await res.status(HttpStatus.CREATED).send(idData);
   }
 
   @UseGuards(LocalAuthGuard)
   @Post('login')
   async login(@Request() req, @Res() res) {
     const tokenData = await this.authService.login(req.user);
-    return res.status(HttpStatus.OK).send(tokenData);
+    return await res.status(HttpStatus.OK).send(tokenData);
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('profile')
   async profile(@Request() req, @Res() res) {
-    return res.status(HttpStatus.OK).send(req.user);
+    return await res.status(HttpStatus.OK).send(req.user);
   }
 }

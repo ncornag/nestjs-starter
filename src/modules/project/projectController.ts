@@ -49,7 +49,7 @@ export class ProjectController {
   })
   async create(data: CreateProjectBody, @Res() res): Promise<IDWithVersion> {
     const idData = await this.service.create(data);
-    return res.status(HttpStatus.CREATED).send(idData);
+    return await res.status(HttpStatus.CREATED).send(idData);
   }
 
   // GET
@@ -89,6 +89,6 @@ export class ProjectController {
   })
   async delete(id: ID, version: Version, @Res() res): Promise<void> {
     await this.service.delete(id, version);
-    return res.status(HttpStatus.NO_CONTENT).send();
+    return await res.status(HttpStatus.NO_CONTENT).send();
   }
 }

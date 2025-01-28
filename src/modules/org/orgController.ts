@@ -21,7 +21,14 @@ import {
   OrgResponseSchema
 } from './orgService.interface';
 import { OrgModel, OrgModelSchema } from './orgModel';
-import { idSchema, ID, Version, versionSchema } from 'src/appModule.interfaces';
+import {
+  idSchema,
+  ID,
+  Version,
+  versionSchema,
+  IDWithVersion,
+  IDWithVersionSchema
+} from 'src/appModule.interfaces';
 import { JwtAuthGuard } from '../auth/jwtAuthGuard';
 import { AllowScopes } from '../auth/scopesAuthGuard';
 import { ADMIN_CLAIMS } from '../user/userService';
@@ -38,7 +45,7 @@ export class OrgController {
   @Post()
   @UseGuards(JwtAuthGuard, AllowScopes(ADMIN_CLAIMS))
   @Validate({
-    response: idSchema,
+    response: IDWithVersionSchema,
     request: [
       {
         type: 'body',
@@ -46,9 +53,9 @@ export class OrgController {
       }
     ]
   })
-  async create(data: CreateOrgBody, @Res() res): Promise<string> {
+  async create(data: CreateOrgBody, @Res() res): Promise<IDWithVersion> {
     const idData = await this.service.create(data);
-    return res.status(HttpStatus.CREATED).send(idData);
+    return await res.status(HttpStatus.CREATED).send(idData);
   }
 
   // GET
@@ -64,7 +71,7 @@ export class OrgController {
       }
     ]
   })
-  async get(id: ID, @Request() req): Promise<OrgModel> {
+  async get(id: ID): Promise<OrgModel> {
     return await this.service.findById(id);
   }
 
@@ -94,6 +101,6 @@ export class OrgController {
   })
   async delete(id: ID, version: Version, @Res() res): Promise<void> {
     await this.service.delete(id, version);
-    return res.status(HttpStatus.NO_CONTENT).send();
+    return await res.status(HttpStatus.NO_CONTENT).send();
   }
 }

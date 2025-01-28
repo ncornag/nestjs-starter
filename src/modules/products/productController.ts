@@ -38,7 +38,7 @@ export class ProductController {
   })
   async create(projectId: ProjectID, data: CreateProjectBody, @Res() res): Promise<string> {
     const idData = await this.service.create(data);
-    return res.status(201).send(idData);
+    return await res.status(201).send(idData);
   }
 
   // GET
@@ -105,6 +105,6 @@ export class ProductController {
   })
   async delete(projectId: ProjectID, id: ID, @Res() res): Promise<void> {
     await this.service.delete(id, 0);
-    return res.status(204).send();
+    return await res.status(204).send();
   }
 }
