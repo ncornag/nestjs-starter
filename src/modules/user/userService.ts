@@ -18,7 +18,7 @@ export class UserService implements IUserService {
 
   // CREATE
   async create(data: CreateUserBody): Promise<IDWithVersion> {
-    // Verigy username
+    // Verify username
     const unameResult = await this.repository.find({ username: data.username });
     if (unameResult.isOk() && unameResult.value[0])
       throw new BadRequestException('Username already exists');
@@ -53,10 +53,10 @@ export class UserService implements IUserService {
   }
 
   // FIND BY USERNAME
-  async findByUsername(username: string): Promise<UserModel | undefined> {
+  async findByUsername(username: string): Promise<UserModel | null> {
     const result = await this.repository.find({ username });
     if (result.isErr()) throw result.error;
-    if (!result.value[0]) throw new NotFoundException('User not found');
+    if (!result.value[0]) return;
     return result.value[0];
   }
 }

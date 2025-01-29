@@ -9,6 +9,10 @@ import { DbService } from 'src/infrastructure/db/dbService';
 import { JwtService } from '@nestjs/jwt';
 import { ADMIN_CLAIMS } from '../user/userService';
 import { HttpStatus } from '@nestjs/common';
+import { ApiClientModule } from '../apiclient/apiClientModule';
+import { ProjectModule } from '../project/projectModule';
+import { UserModule } from '../user/userModule';
+import { OrgModule } from '../org/orgModule';
 
 const clearCollections = async (dbService: DbService) => {
   const collections = await dbService.client.db().listCollections().toArray();

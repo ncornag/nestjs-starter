@@ -7,6 +7,7 @@ import { IDWithVersion } from 'src/appModule.interfaces';
 import { type DbEntity, toEntity, toDbEntity } from 'src/infrastructure/db/dbModule';
 import { mongoDiff } from 'src/infrastructure/db/mongoDiff';
 import { DbService } from 'src/infrastructure/db/dbService';
+import { ProjectNotFoundException } from './projectExceptions';
 
 @Injectable()
 export class ProjectRepository implements IProjectRepository {
@@ -40,7 +41,7 @@ export class ProjectRepository implements IProjectRepository {
     data: Partial<ProjectModel>
   ): Promise<Result<ProjectModel, Error>> {
     const dbEntity = await this.col.findOne(toDbEntity<ProjectModel>(where));
-    if (!dbEntity) throw new NotFoundException('Project not found');
+    if (!dbEntity) throw new ProjectNotFoundException();
     const { ops, updated } = mongoDiff(dbEntity, data);
     if (!ops) return Ok(toEntity<ProjectModel>(dbEntity));
     const updateResult = await this.col.updateOne(toDbEntity<ProjectModel>(where), ops);

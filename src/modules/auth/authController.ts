@@ -1,18 +1,9 @@
-import {
-  Body,
-  Controller,
-  Get,
-  HttpStatus,
-  Post,
-  Request,
-  Res,
-  UseGuards
-} from '@nestjs/common';
+import { Controller, Get, HttpStatus, Post, Request, Res, UseGuards } from '@nestjs/common';
 import { LocalAuthGuard } from './localAuthGuard';
 import { AuthService } from './authService';
 import { Validate } from 'nestjs-typebox';
 import { CreateUserBody, CreateUserBodySchema } from '../user/userService.interface';
-import { idSchema, IDWithVersionSchema } from 'src/appModule.interfaces';
+import { IDWithVersionSchema } from 'src/appModule.interfaces';
 import { JwtAuthGuard } from './jwtAuthGuard';
 
 @Controller('auth')

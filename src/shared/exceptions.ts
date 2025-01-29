@@ -66,8 +66,8 @@ export class CatchEverythingFilter implements ExceptionFilter {
 
     return response.status(HttpStatus.INTERNAL_SERVER_ERROR).send({
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-      message: (exception as any).message,
-      errors: (exception as any).response.errors
+      message: (exception as any)?.message,
+      errors: (exception as any)?.response?.errors
     });
   }
 }

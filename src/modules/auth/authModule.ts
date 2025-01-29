@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import { Module } from '@nestjs/common';
-import { JwtModule, JwtService } from '@nestjs/jwt';
+import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { UserModule } from '../user/userModule';
 import { AuthService } from './authService';
@@ -8,10 +8,11 @@ import { AuthController } from './authController';
 import { LocalStrategy } from './localStrategy';
 import { JwtStrategy } from './jwtAuthStrategy';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ApiClientModule } from '../apiclient/apiClientModule';
+import { ApiClientController } from '../apiclient/apiClientController';
 
 @Module({
   imports: [
-    //JwtModule,
     ConfigModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -28,10 +29,11 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       inject: [ConfigService]
     }),
     UserModule,
+    ApiClientModule,
     PassportModule
   ],
   providers: [AuthService, LocalStrategy, JwtStrategy],
-  controllers: [AuthController],
+  controllers: [AuthController, ApiClientController],
   exports: [AuthService, JwtModule]
 })
 export class AuthModule {}

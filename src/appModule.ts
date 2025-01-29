@@ -7,6 +7,7 @@ import { AuthModule } from './modules/auth/authModule';
 import { OrgModule } from './modules/org/orgModule';
 import { ClsModule } from 'nestjs-cls';
 import { DatabaseModule } from './infrastructure/db/dbModule';
+import { ApiClientModule } from './modules/apiclient/apiClientModule';
 
 export const loggerConfig = {
   level: process.env.LOG_LEVEL || 'info',
@@ -19,7 +20,7 @@ export const loggerConfig = {
     }
   },
   redact: {
-    paths: ['password', '*.password'],
+    paths: ['password', '*.password', 'clientSecret', '*.clientSecret'],
     censor: '***'
   }
 };
@@ -39,6 +40,7 @@ export const loggerConfig = {
     }),
     DatabaseModule,
     AuthModule,
+    ApiClientModule,
     UserModule,
     OrgModule,
     ProjectModule

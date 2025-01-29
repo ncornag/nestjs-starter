@@ -9,7 +9,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { Reflector } from '@nestjs/core';
 import { ClsService } from 'nestjs-cls';
-import { USER } from './authService';
+import { PROJECT, USER } from './authService';
 
 export const PROJECT_SCOPED = 'projectScoped';
 export const PROJECT_TAG = 'project';
@@ -31,13 +31,16 @@ export const AllowScopes = (scopes: string[] | string): Type<CanActivate> => {
         const user = this.cls.get(USER);
         const request = context.switchToHttp().getRequest();
         // Check project claim
+        const requestProjectKey = request.params.projectKey;
+        if (requestProjectKey) {
+          this.cls.set(PROJECT, { key: requestProjectKey });
+        }
         if (this.routeExpectedClaims.find((s) => s === PROJECT_SCOPED) !== undefined) {
-          const requestProjectId = request.params.projectId;
-          if (!requestProjectId) {
+          if (!requestProjectKey) {
             throw new UnauthorizedException('Invalid project');
           }
           const claimProjectId = user.claims.find((s) => s.split(':')[0] === PROJECT_TAG);
-          if (!claimProjectId || requestProjectId !== claimProjectId.split(':')[1]) {
+          if (!claimProjectId || requestProjectKey !== claimProjectId.split(':')[1]) {
             throw new UnauthorizedException('Invalid project');
           }
         }

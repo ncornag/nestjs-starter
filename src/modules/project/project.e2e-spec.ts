@@ -7,7 +7,7 @@ import { DbService } from 'src/infrastructure/db/dbService';
 import { JwtService } from '@nestjs/jwt';
 import { ADMIN_CLAIMS } from '../user/userService';
 import { HttpCode, HttpStatus } from '@nestjs/common';
-import { DbEntity, toEntity } from 'src/infrastructure/db/dbModule';
+import { DatabaseModule, DbEntity, toEntity } from 'src/infrastructure/db/dbModule';
 import { OrgModel } from '../org/orgModel';
 import { ProjectState } from './projectModel';
 import { ProjectModule } from './projectModule';
@@ -52,8 +52,8 @@ describe('ProjectController (e2e)', () => {
           pinoHttp: { level: process.env.LOG_LEVEL || 'debug' }
         }),
         ClsModule.forRoot({ global: true, middleware: { mount: true } }),
-        ProjectModule,
-        OrgModule
+        DatabaseModule,
+        ProjectModule
       ]
     }).compile();
 

@@ -37,7 +37,7 @@ export class UserRepository implements IUserRepository {
   // UPDATE
   async updateOne(where: any, data: Partial<UserModel>): Promise<Result<UserModel, Error>> {
     const dbEntity = await this.col.findOne(toDbEntity<UserModel>(where));
-    if (!dbEntity) throw new NotFoundException('Project not found');
+    if (!dbEntity) throw new NotFoundException('User not found');
     const { ops, updated } = mongoDiff(dbEntity, data);
     if (!ops) return Ok(toEntity<UserModel>(dbEntity));
     const updateResult = await this.col.updateOne(toDbEntity<UserModel>(where), ops);

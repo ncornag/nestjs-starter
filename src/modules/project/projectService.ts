@@ -79,4 +79,12 @@ export class ProjectService implements IProjectService {
     await this.orgService.removeProject(id, ownerId);
     return result.value;
   }
+
+  // FIND BY KEY
+  async findByKey(key: string): Promise<ProjectModel | null> {
+    const result = await this.repository.find({ key });
+    if (result.isErr()) throw result.error;
+    if (!result.value[0]) return;
+    return result.value[0];
+  }
 }

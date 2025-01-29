@@ -7,9 +7,10 @@ import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify
 import { DbService } from 'src/infrastructure/db/dbService';
 import { JwtService } from '@nestjs/jwt';
 import { ADMIN_CLAIMS } from '../user/userService';
-import { HttpStatus } from '@nestjs/common';
+import { forwardRef, HttpStatus } from '@nestjs/common';
 import { ORG_NOT_FOUND } from './orgExceptions';
 import { NOT_MODIFIED } from 'src/shared/exceptions';
+import { DatabaseModule } from 'src/infrastructure/db/dbModule';
 
 const clearCollections = async (dbService: DbService) => {
   const collections = await dbService.client.db().listCollections().toArray();
@@ -38,6 +39,7 @@ describe('OrgController (e2e)', () => {
           pinoHttp: { level: process.env.LOG_LEVEL || 'warn' }
         }),
         ClsModule.forRoot({ global: true, middleware: { mount: true } }),
+        DatabaseModule,
         OrgModule
       ]
     }).compile();

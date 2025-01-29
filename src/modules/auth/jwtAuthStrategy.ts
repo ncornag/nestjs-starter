@@ -20,7 +20,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload) {
-    // TODO Check revoqued tokens?
+    // TODO Check revoked tokens?
     // TODO Validate user exists and is still valid?
     // TODO Enrich the user object?
     const userData = { id: payload.sub, claims: payload.claims };
