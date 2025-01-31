@@ -6,12 +6,12 @@ import { IDWithVersion } from 'src/appModule.interfaces';
 export const _IAuthService = 'IAuthService';
 
 // RESPONSE
-export const ApiClientCreateResponseSchema = Type.Omit(ApiClientModelSchema, ['id'], {
+export const ApiClientCreateResponseSchema = Type.Omit(ApiClientModelSchema, [], {
   additionalProperties: false
 });
 export type ApiClientCreateResponse = Static<typeof ApiClientCreateResponseSchema>;
 
-export const ApiClientResponseSchema = Type.Omit(ApiClientModelSchema, ['id', 'clientSecret'], {
+export const ApiClientResponseSchema = Type.Omit(ApiClientModelSchema, ['clientSecret'], {
   additionalProperties: false
 });
 export type ApiClientResponse = Static<typeof ApiClientResponseSchema>;

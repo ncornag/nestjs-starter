@@ -1,9 +1,10 @@
 import { Type, type Static } from '@sinclair/typebox';
-import { idSchema } from 'src/appModule.interfaces';
+
+export const apiClientIdSchema = Type.String({ pattern: '^[A-Za-z0-9_-]{16,64}$' });
+export type ApiClientId = Static<typeof apiClientIdSchema>;
 
 export const ApiClientModelSchema = Type.Object({
-  id: idSchema,
-  clientId: Type.String({ pattern: '^[A-Za-z0-9_-]{16,64}$' }),
+  id: apiClientIdSchema,
   clientSecret: Type.String(),
   name: Type.String(),
   scopes: Type.Array(Type.String()),

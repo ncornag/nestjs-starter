@@ -9,6 +9,13 @@ import { DbService } from 'src/infrastructure/db/dbService';
 import { JwtService } from '@nestjs/jwt';
 import { ADMIN_CLAIMS } from '../user/userService';
 import { HttpStatus } from '@nestjs/common';
+import { ApiClientModule } from './apiClientModule';
+import { ProjectModule } from '../project/projectModule';
+import { UserModule } from '../user/userModule';
+import { OrgModule } from '../org/orgModule';
+import { OrgModel } from '../org/orgModel';
+import { ProjectState } from '../project/projectModel';
+import { ID, IDWithVersion } from 'src/appModule.interfaces';
 
 const clearCollections = async (dbService: DbService) => {
   const collections = await dbService.client.db().listCollections().toArray();
@@ -29,6 +36,12 @@ describe('AuthController (e2e)', () => {
   let token_iss: string;
   let token_aud: string;
   let token_exp: number;
+
+  const userData = {
+    username: 'test@gmail.com',
+    password: 'changeme'
+  } as any;
+  let userIdData;
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -63,6 +76,24 @@ describe('AuthController (e2e)', () => {
     token_iss = configService.get<string>('TOKEN_ISS');
     token_aud = configService.get<string>('TOKEN_AUD');
     token_exp = configService.get<number>('TOKEN_EXP');
+
+    // Create user
+    const createResult = await app.inject({
+      method: 'POST',
+      url: '/auth/signup',
+      body: userData
+    });
+    expect(createResult.statusCode).toEqual(HttpStatus.CREATED);
+    userIdData = createResult.json();
+
+    // Login user
+    const loginResult = await app.inject({
+      method: 'POST',
+      url: '/auth/login',
+      body: userData
+    });
+    expect(loginResult.statusCode).toEqual(HttpStatus.OK);
+    token = loginResult.json().access_token;
   });
 
   afterAll(async () => {
@@ -73,88 +104,55 @@ describe('AuthController (e2e)', () => {
   afterEach(async () => {});
 
   // TESTS
-  const userData = {
-    username: 'test@gmail.com',
-    password: 'changeme'
+  const orgData = {
+    version: 0,
+    name: 'Org Name',
+    createdAt: new Date().toISOString(),
+    projects: []
   } as any;
-  let userIdData;
+  const projectData = {
+    key: 'myproject',
+    state: 'online'
+  } as any;
+  let orgIdData: any;
+  let projectIdData: any;
+  let createdApiClient: any;
 
-  describe('signUp', () => {
-    it('should create a user', async () => {
+  describe('create ApiClient', () => {
+    it('should create an apiClient', async () => {
+      orgData.ownerId = userIdData.id;
+      orgIdData = await dbService.client.db().collection('orgs').insertOne(orgData);
+      projectData.orgId = orgIdData.insertedId;
+      projectData.ownerId = userIdData.id;
+      projectIdData = await dbService.client.db().collection('projects').insertOne(projectData);
+      const apiClientData = { name: 'test', scopes: [] };
       const result = await app.inject({
         method: 'POST',
-        url: '/auth/signup',
-        body: userData
+        url: `/${projectData.key}/api-clients`,
+        headers: { authorization: `Bearer ${token}` },
+        body: apiClientData
       });
       expect(result.statusCode).toEqual(HttpStatus.CREATED);
-      userIdData = result.json();
-    });
-
-    it('should return error if username already exists', async () => {
-      const result = await app.inject({
-        method: 'POST',
-        url: '/auth/signup',
-        body: userData
+      createdApiClient = result.json();
+      expect(createdApiClient).toEqual({
+        name: apiClientData.name,
+        scopes: [`project:${projectData.key}`],
+        clientId: expect.any(String),
+        clientSecret: expect.any(String),
+        isActive: true
       });
-      expect(result.statusCode).toEqual(HttpStatus.BAD_REQUEST);
-    });
 
-    it('should be in the database', async () => {
       const record = await dbService.client
         .db()
-        .collection('users')
-        .findOne({ _id: userIdData.id });
-      expect({
-        id: record._id,
-        version: record.version,
-        username: record.username
-      }).toEqual({
-        id: userIdData.id,
-        version: userIdData.version,
-        username: userData.username
-      });
-    });
-  });
+        .collection('apiClients')
+        .findOne({ name: createdApiClient.name });
 
-  describe('login', () => {
-    it('should login a user', async () => {
-      const result = await app.inject({
-        method: 'POST',
-        url: '/auth/login',
-        body: userData
-      });
-      expect(result.statusCode).toEqual(HttpStatus.OK);
-      token = result.json().access_token;
-      const decodedToken = jwtService.decode(token);
-      expect(decodedToken).toEqual({
-        sub: userIdData.id,
-        iss: token_iss,
-        aud: token_aud,
-        claims: ADMIN_CLAIMS,
-        iat: expect.any(Number),
-        exp: decodedToken.iat + token_exp
-      });
-    });
-
-    it('should return error on incorrect password', async () => {
-      const result = await app.inject({
-        method: 'POST',
-        url: '/auth/login',
-        body: { ...userData, password: '' }
-      });
-      expect(result.statusCode).toEqual(HttpStatus.UNAUTHORIZED);
-    });
-
-    it('should be able to access the profile', async () => {
-      const result = await app.inject({
-        method: 'GET',
-        url: '/auth/profile',
-        headers: { authorization: `Bearer ${token}` }
-      });
-      expect(result.statusCode).toEqual(HttpStatus.OK);
-      expect(result.json()).toEqual({
-        id: userIdData.id,
-        claims: ADMIN_CLAIMS
+      expect({ ...record, createdAt: new Date(record.createdAt) }).toEqual({
+        ...createdApiClient,
+        _id: expect.any(String),
+        version: 0,
+        clientSecret: expect.any(String),
+        createdAt: expect.any(Date)
       });
     });
   });

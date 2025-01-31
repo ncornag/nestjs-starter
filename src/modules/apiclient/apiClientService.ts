@@ -1,13 +1,7 @@
 import { nanoid } from 'nanoid';
 import { PinoLogger } from 'nestjs-pino';
-import {
-  BadRequestException,
-  forwardRef,
-  Inject,
-  Injectable,
-  UnauthorizedException
-} from '@nestjs/common';
-import { ApiClientModel } from './apiClientModel';
+import { BadRequestException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { ApiClientId, ApiClientModel } from './apiClientModel';
 import { CreateApiClientBody, IApiClientService } from './apiClientService.interface';
 import { _IApiClientRepository, IApiClientRepository } from './apiClientRepository.interface';
 import { IDWithVersion } from 'src/appModule.interfaces';
@@ -44,8 +38,13 @@ export class ApiClientService implements IApiClientService {
   }
 
   // FIND BY CLIENTID
-  async findByClientId(clientId: string): Promise<ApiClientModel | null> {
-    const result = await this.repository.find({ clientId });
+  async findByClientId(clientId: ApiClientId): Promise<ApiClientModel | null> {
+    const projectKey = this.cls.get(PROJECT).key;
+    const userId = this.cls.get(USER).id;
+    const project = await this.projectService.findByKey(projectKey);
+    if (!project) throw new ProjectNotFoundException();
+    if (project.ownerId !== userId) throw new UnauthorizedException();
+    const result = await this.repository.find({ id: clientId });
     if (result.isErr()) throw result.error;
     if (!result.value[0]) return;
     return result.value[0];

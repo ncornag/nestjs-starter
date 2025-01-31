@@ -6,7 +6,6 @@ import {
   Controller,
   Inject,
   Res,
-  Request,
   UseGuards,
   HttpStatus
 } from '@nestjs/common';

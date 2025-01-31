@@ -15,6 +15,6 @@ export class ApiClientStrategy extends PassportStrategy(BasicStrategy, 'api-clie
     if (!apiClient) {
       throw new UnauthorizedException();
     }
-    return { clientId: apiClient.clientId, claims: apiClient.scopes };
+    return { clientId: apiClient.id, claims: apiClient.scopes };
   }
 }

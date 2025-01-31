@@ -68,19 +68,19 @@ export class AuthService implements IAuthService {
 
   async createApiClient(data: CreateApiClientBody): Promise<ApiClientCreateResponse> {
     const projectKey = this.cls.get(PROJECT).key;
-    const clientId = this.generateClientId();
+    const id = this.generateClientId();
     const clientSecret = this.generateClientSecret();
     const clientSecretHash = await bcrypt.hash(clientSecret, this.passSaltRounds);
+    // TODO add validity & accesstoken validity
     const apiClient: any = {
       ...data,
-      clientId,
+      id,
       clientSecret: clientSecretHash,
       scopes: [...data.scopes, `${PROJECT_TAG}:${projectKey}`],
       isActive: true
     };
-    await this.apiClientService.create(apiClient);
-    apiClient.clientSecret = clientSecret; // Show it only once
-    return apiClient;
+    const idData = await this.apiClientService.create(apiClient);
+    return { ...apiClient, clientSecret };
   }
 
   async validateApiClient(
