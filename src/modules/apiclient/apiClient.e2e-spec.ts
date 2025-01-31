@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { LoggerModule } from 'nestjs-pino';
 import { ClsModule } from 'nestjs-cls';
-import { DatabaseModule, DbEntity } from 'src/infrastructure/db/dbModule';
+import { DatabaseModule, DbEntity, toEntity } from 'src/infrastructure/db/dbModule';
 import { AuthModule } from 'src/modules/auth/authModule';
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
 import { DbService } from 'src/infrastructure/db/dbService';
@@ -16,6 +16,7 @@ import { OrgModule } from '../org/orgModule';
 import { OrgModel } from '../org/orgModel';
 import { ProjectState } from '../project/projectModel';
 import { ID, IDWithVersion } from 'src/appModule.interfaces';
+import { ApiClientModel } from './apiclientModel';
 
 const clearCollections = async (dbService: DbService) => {
   const collections = await dbService.client.db().listCollections().toArray();
@@ -26,7 +27,7 @@ const clearCollections = async (dbService: DbService) => {
   );
 };
 
-describe('AuthController (e2e)', () => {
+describe('ApiClientController (e2e)', () => {
   // CONFIG
   let app: NestFastifyApplication;
   let dbService: DbService;
@@ -97,7 +98,7 @@ describe('AuthController (e2e)', () => {
   });
 
   afterAll(async () => {
-    await clearCollections(dbService);
+    //await clearCollections(dbService);
     await app.close();
   });
 
@@ -118,7 +119,7 @@ describe('AuthController (e2e)', () => {
   let projectIdData: any;
   let createdApiClient: any;
 
-  describe('create ApiClient', () => {
+  describe('create', () => {
     it('should create an apiClient', async () => {
       orgData.ownerId = userIdData.id;
       orgIdData = await dbService.client.db().collection('orgs').insertOne(orgData);
@@ -137,7 +138,7 @@ describe('AuthController (e2e)', () => {
       expect(createdApiClient).toEqual({
         name: apiClientData.name,
         scopes: [`project:${projectData.key}`],
-        clientId: expect.any(String),
+        id: expect.any(String),
         clientSecret: expect.any(String),
         isActive: true
       });
@@ -146,13 +147,35 @@ describe('AuthController (e2e)', () => {
         .db()
         .collection('apiClients')
         .findOne({ name: createdApiClient.name });
-
-      expect({ ...record, createdAt: new Date(record.createdAt) }).toEqual({
+      expect(
+        toEntity({
+          ...record,
+          createdAt: new Date(record.createdAt)
+        } as any)
+      ).toEqual({
         ...createdApiClient,
-        _id: expect.any(String),
         version: 0,
         clientSecret: expect.any(String),
         createdAt: expect.any(Date)
+      });
+    });
+  });
+
+  describe('find', () => {
+    it('should find an apiClient', async () => {
+      const result = await app.inject({
+        method: 'GET',
+        url: `/${projectData.key}/api-clients/${createdApiClient.id}`,
+        headers: { authorization: `Bearer ${token}` }
+      });
+      expect(result.statusCode).toEqual(HttpStatus.OK);
+      const record = result.json();
+      expect({ ...record }).toEqual({
+        name: createdApiClient.name,
+        id: createdApiClient.id,
+        scopes: [`project:${projectData.key}`],
+        clientSecret: expect.any(String),
+        isActive: true
       });
     });
   });
