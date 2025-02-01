@@ -7,6 +7,7 @@ export const ApiClientModelSchema = Type.Object({
   id: apiClientIdSchema,
   clientSecret: Type.String(),
   name: Type.String(),
+  projectKey: Type.String(),
   scopes: Type.Array(Type.String()),
   isActive: Type.Boolean()
 });

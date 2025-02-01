@@ -85,7 +85,7 @@ export class ApiClientController {
   @UseGuards(ApiClientAuthGuard)
   @Post('token')
   async token(@Request() req, @Res({ passthrough: true }) res) {
-    const tokenData = await this.authService.createApiToken(req.user);
+    const tokenData = await this.authService.createApiToken(req.body?.scopes ?? [], req.user);
     res.status(HttpStatus.OK);
     return tokenData;
   }

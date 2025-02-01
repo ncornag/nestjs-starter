@@ -24,6 +24,8 @@ export const PROJECT = 'project';
 @Injectable()
 export class AuthService implements IAuthService {
   private passSaltRounds: number;
+  private scopes: string[] = [];
+
   constructor(
     private readonly cls: ClsService,
     private configService: ConfigService,
@@ -34,6 +36,17 @@ export class AuthService implements IAuthService {
     private apiClientService: ApiClientService
   ) {
     this.passSaltRounds = configService.get<number>('PASSWORD_SALT_ROUNDS');
+  }
+
+  addScopes(scopes: string[]) {
+    this.scopes.push(...scopes);
+  }
+
+  private validateScopes(scopes: string[], scopesToValidate: string[]): void {
+    const invalidScopes = scopesToValidate.filter((scope) => !scopes.includes(scope));
+    if (invalidScopes.length > 0) {
+      throw new Error(`Invalid scopes: ${invalidScopes.join(', ')}`);
+    }
   }
 
   private generateClientId(): string {
@@ -68,25 +81,36 @@ export class AuthService implements IAuthService {
 
   async createApiClient(data: CreateApiClientBody): Promise<ApiClientCreateResponse> {
     const projectKey = this.cls.get(PROJECT).key;
+    this.validateScopes(this.scopes, data.scopes);
     const id = this.generateClientId();
     const clientSecret = this.generateClientSecret();
     const clientSecretHash = await bcrypt.hash(clientSecret, this.passSaltRounds);
     // TODO add validity & accesstoken validity
-    // TODO allow scope narrowing
     const apiClient: any = {
       ...data,
       id,
       clientSecret: clientSecretHash,
       scopes: [...data.scopes, `${PROJECT_TAG}:${projectKey}`],
+      projectKey: projectKey,
       isActive: true
     };
     const idData = await this.apiClientService.create(apiClient);
     return { ...apiClient, clientSecret };
   }
 
-  async createApiToken(apiClient: any): Promise<{ access_token: string }> {
-    // TODO allow scope narrowing
-    const payload = { sub: apiClient.clientId, claims: apiClient.claims };
+  async createApiToken(
+    scopes: string[] = [],
+    apiClient: any
+  ): Promise<{ access_token: string }> {
+    this.validateScopes(apiClient.claims, scopes);
+    const payload = {
+      sub: apiClient.clientId,
+      claims:
+        scopes.length === 0
+          ? apiClient.claims
+          : [...scopes, `${PROJECT_TAG}:${apiClient.projectKey}`]
+    };
+    console.log(apiClient, payload);
     return {
       access_token: this.jwtService.sign(payload)
     };

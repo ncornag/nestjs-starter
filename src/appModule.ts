@@ -8,6 +8,7 @@ import { OrgModule } from './modules/org/orgModule';
 import { ClsModule } from 'nestjs-cls';
 import { DatabaseModule } from './infrastructure/db/dbModule';
 import { ApiClientModule } from './modules/apiclient/apiClientModule';
+import { ProductModule } from './modules/products/productModule';
 
 export const loggerConfig = {
   level: process.env.LOG_LEVEL || 'info',
@@ -43,7 +44,8 @@ export const loggerConfig = {
     ApiClientModule,
     UserModule,
     OrgModule,
-    ProjectModule
+    ProjectModule,
+    ProductModule
   ],
   exports: [DatabaseModule]
 })
