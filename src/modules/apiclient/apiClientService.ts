@@ -40,10 +40,10 @@ export class ApiClientService implements IApiClientService {
   // FIND BY CLIENTID
   async findByClientId(clientId: ApiClientId): Promise<ApiClientModel | null> {
     const projectKey = this.cls.get(PROJECT).key;
-    const userId = this.cls.get(USER).id;
     const project = await this.projectService.findByKey(projectKey);
     if (!project) throw new ProjectNotFoundException();
-    if (project.ownerId !== userId) throw new UnauthorizedException();
+    const userId = this.cls.get(USER)?.id ?? null;
+    if (userId && userId !== project.ownerId) throw new UnauthorizedException();
     const result = await this.repository.find({ id: clientId });
     if (result.isErr()) throw result.error;
     if (!result.value[0]) return;

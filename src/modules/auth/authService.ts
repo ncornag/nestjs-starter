@@ -44,7 +44,7 @@ export class AuthService implements IAuthService {
     return crypto.randomBytes(64).toString('base64');
   }
 
-  // Used in the localStrategy
+  // Used in the LocalStrategy
   async validateUser(username: string, incommingPassword: string): Promise<any | null> {
     const user = await this.usersService.findByUsername(username);
     if (!user) return;
@@ -72,6 +72,7 @@ export class AuthService implements IAuthService {
     const clientSecret = this.generateClientSecret();
     const clientSecretHash = await bcrypt.hash(clientSecret, this.passSaltRounds);
     // TODO add validity & accesstoken validity
+    // TODO allow scope narrowing
     const apiClient: any = {
       ...data,
       id,
@@ -83,6 +84,15 @@ export class AuthService implements IAuthService {
     return { ...apiClient, clientSecret };
   }
 
+  async createApiToken(apiClient: any): Promise<{ access_token: string }> {
+    // TODO allow scope narrowing
+    const payload = { sub: apiClient.clientId, claims: apiClient.claims };
+    return {
+      access_token: this.jwtService.sign(payload)
+    };
+  }
+
+  // Used in the ApiClientStrategy
   async validateApiClient(
     clientId: string,
     incommingClientSecret: string

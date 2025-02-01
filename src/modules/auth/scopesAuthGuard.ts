@@ -6,8 +6,6 @@ import {
   Type,
   UnauthorizedException
 } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { Reflector } from '@nestjs/core';
 import { ClsService } from 'nestjs-cls';
 import { PROJECT, USER } from './authService';
 
@@ -18,11 +16,7 @@ export const AllowScopes = (scopes: string[] | string): Type<CanActivate> => {
   @Injectable()
   class AuthGuardMixin implements CanActivate {
     private routeExpectedClaims: string[];
-    constructor(
-      private jwtService: JwtService,
-      private reflector: Reflector,
-      private readonly cls: ClsService
-    ) {
+    constructor(private readonly cls: ClsService) {
       this.routeExpectedClaims = Array.isArray(scopes) ? scopes : [scopes];
     }
 

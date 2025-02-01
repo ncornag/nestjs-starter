@@ -10,6 +10,7 @@ import { JwtStrategy } from './jwtAuthStrategy';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ApiClientModule } from '../apiclient/apiClientModule';
 import { ApiClientController } from '../apiclient/apiClientController';
+import { ApiClientStrategy } from '../apiclient/apiClientStrategy';
 
 @Module({
   imports: [
@@ -32,7 +33,7 @@ import { ApiClientController } from '../apiclient/apiClientController';
     ApiClientModule,
     PassportModule
   ],
-  providers: [AuthService, LocalStrategy, JwtStrategy],
+  providers: [AuthService, LocalStrategy, JwtStrategy, ApiClientStrategy],
   controllers: [AuthController, ApiClientController],
   exports: [AuthService, JwtModule]
 })

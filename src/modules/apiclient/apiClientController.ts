@@ -1,4 +1,13 @@
-import { Controller, Get, HttpStatus, Inject, Post, Res, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  HttpStatus,
+  Inject,
+  Post,
+  Request,
+  Res,
+  UseGuards
+} from '@nestjs/common';
 import { AuthService } from '../auth/authService';
 import { Validate } from 'nestjs-typebox';
 import { JwtAuthGuard } from '../auth/jwtAuthGuard';
@@ -12,6 +21,7 @@ import {
 import { idSchema, ProjectID, projectIdSchema } from 'src/appModule.interfaces';
 import { ApiClientId, apiClientIdSchema, ApiClientModel } from './apiclientModel';
 import { _IApiClientService, IApiClientService } from './apiClientService.interface';
+import { ApiClientAuthGuard } from '../auth/apiClientAuthGuard';
 
 type NewType = ApiClientModel;
 
@@ -72,5 +82,11 @@ export class ApiClientController {
     return await this.service.findByClientId(id);
   }
 
-  // }
+  @UseGuards(ApiClientAuthGuard)
+  @Post('token')
+  async token(@Request() req, @Res({ passthrough: true }) res) {
+    const tokenData = await this.authService.createApiToken(req.user);
+    res.status(HttpStatus.OK);
+    return tokenData;
+  }
 }
