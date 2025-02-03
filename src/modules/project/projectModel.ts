@@ -1,5 +1,5 @@
 import { Type, type Static } from '@sinclair/typebox';
-import { AuditFields, idSchema } from 'src/appModule.interfaces';
+import { AuditFields, idSchema, projectKeySchema } from 'src/appModule.interfaces';
 
 export const ProjectState = {
   ONLINE: 'online',
@@ -12,7 +12,7 @@ export const ProjectModelSchema = Type.Object(
     id: idSchema,
     orgId: idSchema,
     ownerId: idSchema,
-    key: Type.String({ pattern: '^[A-Za-z0-9]{3,25}$' }),
+    key: projectKeySchema,
     description: Type.Optional(Type.String({ maxLength: 255 })),
     state: ProjectStateSchema,
     ...AuditFields

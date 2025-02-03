@@ -2,7 +2,7 @@ import { Get, Delete, Patch, Post, Controller, Inject, Res, UseGuards } from '@n
 import { Validate } from 'nestjs-typebox';
 import {
   _IProjectService,
-  IProjectService,
+  IProjectService as IProductService,
   CreateProjectBodySchema,
   CreateProjectBody,
   UpdateProjectBodySchema,
@@ -12,19 +12,22 @@ import { ProjectModel, ProjectModelSchema } from '../project/projectModel';
 import {
   idSchema,
   ID,
-  projectIdSchema,
-  ProjectID,
+  projectKeySchema,
+  ProjectKey,
   IDWithVersionSchema,
   IDWithVersion
 } from 'src/appModule.interfaces';
-import { AllowScopes } from 'src/modules/auth/scopesAuthGuard';
+import { AllowScopes, PROJECT_SCOPED, PUBLIC_ACCESS } from 'src/modules/auth/scopesAuthGuard';
+import { JwtAuthGuard } from '../auth/jwtAuthGuard';
+import { _IProductService } from './productService.interface';
+import { ProductModel, ProductModelSchema } from './productModel';
 
 // CONTROLLER
-@Controller(':projectId/products')
+@Controller(':projectKey/products')
 export class ProductController {
   constructor(
-    @Inject(_IProjectService)
-    private readonly service: IProjectService
+    @Inject(_IProductService)
+    private readonly service: IProductService
   ) {}
 
   // @UseGuards(AllowScopes('catalog:write'))
@@ -33,9 +36,9 @@ export class ProductController {
     response: IDWithVersionSchema,
     request: [
       {
-        name: 'projectId',
+        name: 'projectKey',
         type: 'param',
-        schema: projectIdSchema
+        schema: projectKeySchema
       },
       {
         type: 'body',
@@ -44,7 +47,7 @@ export class ProductController {
     ]
   })
   async create(
-    projectId: ProjectID,
+    projectKey: ProjectKey,
     data: CreateProjectBody,
     @Res({ passthrough: true }) res
   ): Promise<IDWithVersion> {
@@ -54,14 +57,15 @@ export class ProductController {
   }
 
   // GET
+  @UseGuards(JwtAuthGuard, AllowScopes([PROJECT_SCOPED, PUBLIC_ACCESS]))
   @Get(':id')
   @Validate({
-    response: ProjectModelSchema,
+    response: ProductModelSchema,
     request: [
       {
-        name: 'projectId',
+        name: 'projectKey',
         type: 'param',
-        schema: projectIdSchema
+        schema: projectKeySchema
       },
       {
         name: 'id',
@@ -70,8 +74,8 @@ export class ProductController {
       }
     ]
   })
-  async get(projectId: ProjectID, id: ID): Promise<ProjectModel> {
-    return await this.service.findById(id);
+  async get(projectKey: ProjectKey, id: ID): Promise<ProductModel> {
+    return (await this.service.findById(id)) as unknown as ProductModel;
   }
 
   // UPDATE
@@ -80,9 +84,9 @@ export class ProductController {
     response: ProjectModelSchema,
     request: [
       {
-        name: 'projectId',
+        name: 'projectKey',
         type: 'param',
-        schema: projectIdSchema
+        schema: projectKeySchema
       },
       {
         name: 'id',
@@ -95,7 +99,7 @@ export class ProductController {
       }
     ]
   })
-  async update(projectId: ProjectID, id: ID, data: UpdateProjectBody): Promise<ProjectModel> {
+  async update(projectKey: ProjectKey, id: ID, data: UpdateProjectBody): Promise<ProjectModel> {
     return await this.service.update(id, 0, data);
   }
 
@@ -104,9 +108,9 @@ export class ProductController {
   @Validate({
     request: [
       {
-        name: 'projectId',
+        name: 'projectKey',
         type: 'param',
-        schema: projectIdSchema
+        schema: projectKeySchema
       },
       {
         name: 'id',
@@ -115,7 +119,7 @@ export class ProductController {
       }
     ]
   })
-  async delete(projectId: ProjectID, id: ID, @Res({ passthrough: true }) res): Promise<void> {
+  async delete(projectKey: ProjectKey, id: ID, @Res({ passthrough: true }) res): Promise<void> {
     await this.service.delete(id, 0);
     res.status(204);
     return;

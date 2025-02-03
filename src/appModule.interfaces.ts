@@ -15,6 +15,8 @@ export const versionSchema = AuditFields.version;
 export type Version = Static<typeof versionSchema>;
 export const projectIdSchema = Type.String();
 export type ProjectID = Static<typeof projectIdSchema>;
+export const projectKeySchema = Type.String({ pattern: '^[A-Za-z0-9]{3,25}$' });
+export type ProjectKey = Static<typeof projectKeySchema>;
 export const IDWithVersionSchema = Type.Object({
   id: idSchema,
   version: versionSchema

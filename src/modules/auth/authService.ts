@@ -110,7 +110,6 @@ export class AuthService implements IAuthService {
           ? apiClient.claims
           : [...scopes, `${PROJECT_TAG}:${apiClient.projectKey}`]
     };
-    console.log(apiClient, payload);
     return {
       access_token: this.jwtService.sign(payload)
     };

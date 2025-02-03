@@ -11,6 +11,7 @@ import { PROJECT, USER } from './authService';
 
 export const PROJECT_SCOPED = 'projectScoped';
 export const PROJECT_TAG = 'project';
+export const PUBLIC_ACCESS = '*';
 
 export const AllowScopes = (scopes: string[] | string): Type<CanActivate> => {
   @Injectable()
@@ -42,7 +43,8 @@ export const AllowScopes = (scopes: string[] | string): Type<CanActivate> => {
         if (!this.routeExpectedClaims || !this.routeExpectedClaims.length) {
           throw new UnauthorizedException('Insufficient privileges');
         }
-        if (this.routeExpectedClaims[0] === '*') return;
+        if (this.routeExpectedClaims.find((s) => s === PUBLIC_ACCESS) !== undefined)
+          return true;
         if (
           !this.routeExpectedClaims
             .filter((s) => s !== PROJECT_SCOPED)
