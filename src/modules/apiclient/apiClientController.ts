@@ -22,6 +22,7 @@ import { idSchema, ProjectID, projectIdSchema } from 'src/appModule.interfaces';
 import { ApiClientId, apiClientIdSchema, ApiClientModel } from './apiclientModel';
 import { _IApiClientService, IApiClientService } from './apiClientService.interface';
 import { ApiClientAuthGuard } from '../auth/apiClientAuthGuard';
+import { ProjectAuthGuard } from '../auth/projectAuthGuard';
 
 type NewType = ApiClientModel;
 
@@ -82,7 +83,7 @@ export class ApiClientController {
     return await this.service.findByClientId(id);
   }
 
-  @UseGuards(ApiClientAuthGuard)
+  @UseGuards(ProjectAuthGuard, ApiClientAuthGuard)
   @Post('token')
   async token(@Request() req, @Res({ passthrough: true }) res) {
     const tokenData = await this.authService.createApiToken(req.body?.scopes ?? [], req.user);

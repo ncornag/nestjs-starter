@@ -1,4 +1,15 @@
-import { Get, Delete, Patch, Post, Controller, Inject, Res, UseGuards } from '@nestjs/common';
+import {
+  Get,
+  Delete,
+  Patch,
+  Post,
+  Controller,
+  Inject,
+  Res,
+  UseGuards,
+  Param,
+  UseInterceptors
+} from '@nestjs/common';
 import { Validate } from 'nestjs-typebox';
 import {
   _IProjectService,
@@ -17,13 +28,15 @@ import {
   IDWithVersionSchema,
   IDWithVersion
 } from 'src/appModule.interfaces';
-import { AllowScopes, PROJECT_SCOPED, PUBLIC_ACCESS } from 'src/modules/auth/scopesAuthGuard';
+import { AllowScopes, PUBLIC_ACCESS } from 'src/modules/auth/scopesAuthGuard';
 import { JwtAuthGuard } from '../auth/jwtAuthGuard';
 import { _IProductService } from './productService.interface';
 import { ProductModel, ProductModelSchema } from './productModel';
+import { ProjectAuthGuard } from '../auth/projectAuthGuard';
 
 // CONTROLLER
 @Controller(':projectKey/products')
+@UseGuards(JwtAuthGuard, ProjectAuthGuard)
 export class ProductController {
   constructor(
     @Inject(_IProductService)
@@ -57,8 +70,8 @@ export class ProductController {
   }
 
   // GET
-  @UseGuards(JwtAuthGuard, AllowScopes([PROJECT_SCOPED, PUBLIC_ACCESS]))
   @Get(':id')
+  @UseGuards(AllowScopes('catalog:read'))
   @Validate({
     response: ProductModelSchema,
     request: [
