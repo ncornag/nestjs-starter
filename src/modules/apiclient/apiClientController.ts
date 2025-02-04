@@ -18,7 +18,12 @@ import {
   CreateApiClientBody,
   CreateApiClientBodySchema
 } from '../auth/authService.interface';
-import { idSchema, ProjectID, projectIdSchema } from 'src/appModule.interfaces';
+import {
+  ProjectID,
+  projectIdSchema,
+  ProjectKey,
+  projectKeySchema
+} from 'src/appModule.interfaces';
 import { ApiClientId, apiClientIdSchema, ApiClientModel } from './apiclientModel';
 import { _IApiClientService, IApiClientService } from './apiClientService.interface';
 import { ApiClientAuthGuard } from '../auth/apiClientAuthGuard';
@@ -43,7 +48,7 @@ export class ApiClientController {
       {
         name: 'projectKey',
         type: 'param',
-        schema: projectIdSchema
+        schema: projectKeySchema
       },
       {
         type: 'body',
@@ -52,11 +57,11 @@ export class ApiClientController {
     ]
   })
   async create(
-    projectKey: ProjectID,
+    projectKey: ProjectKey,
     data: CreateApiClientBody,
     @Res({ passthrough: true }) res
   ) {
-    const idData = await this.authService.createApiClient(data);
+    const idData = await this.authService.createApiClient(projectKey, data);
     res.status(HttpStatus.CREATED);
     return idData;
   }
@@ -70,7 +75,7 @@ export class ApiClientController {
       {
         name: 'projectKey',
         type: 'param',
-        schema: projectIdSchema
+        schema: projectKeySchema
       },
       {
         name: 'id',
@@ -80,7 +85,7 @@ export class ApiClientController {
     ]
   })
   async get(projectKey: ProjectID, id: ApiClientId): Promise<ApiClientModel> {
-    return await this.service.findByClientId(id);
+    return await this.service.findByClientId(projectKey, id);
   }
 
   @UseGuards(ProjectAuthGuard, ApiClientAuthGuard)

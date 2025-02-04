@@ -7,6 +7,7 @@ import { ID, IDWithVersion } from 'src/appModule.interfaces';
 import { type DbEntity, toEntity, toDbEntity } from 'src/infrastructure/db/dbModule';
 import { mongoDiff } from 'src/infrastructure/db/mongoDiff';
 import { DbService } from 'src/infrastructure/db/dbService';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class OrgRepository implements IOrgRepository {
@@ -14,11 +15,14 @@ export class OrgRepository implements IOrgRepository {
 
   constructor(
     @Inject('DbService')
-    private db: DbService
+    private db: DbService,
+    private configService: ConfigService
   ) {}
 
   public async onModuleInit() {
-    this.col = this.db.getDb().collection<DbEntity<OrgModel>>('orgs');
+    this.col = this.db
+      .getDb(this.configService.get<string>('MAIN_DB'))
+      .collection<DbEntity<OrgModel>>('orgs');
   }
 
   // CREATE

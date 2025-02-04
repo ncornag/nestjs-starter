@@ -14,7 +14,7 @@ import {
   CreateApiClientBody,
   IAuthService
 } from './authService.interface';
-import { IDWithVersion } from 'src/appModule.interfaces';
+import { IDWithVersion, ProjectKey } from 'src/appModule.interfaces';
 import { ClsService } from 'nestjs-cls';
 import { PROJECT_TAG } from './scopesAuthGuard';
 
@@ -79,8 +79,10 @@ export class AuthService implements IAuthService {
     };
   }
 
-  async createApiClient(data: CreateApiClientBody): Promise<ApiClientCreateResponse> {
-    const projectKey = this.cls.get(PROJECT).key;
+  async createApiClient(
+    projectKey: ProjectKey,
+    data: CreateApiClientBody
+  ): Promise<ApiClientCreateResponse> {
     this.validateScopes(this.scopes, data.scopes);
     const id = this.generateClientId();
     const clientSecret = this.generateClientSecret();
@@ -91,11 +93,10 @@ export class AuthService implements IAuthService {
       id,
       clientSecret: clientSecretHash,
       scopes: [...data.scopes, `${PROJECT_TAG}:${projectKey}`],
-      projectKey: projectKey,
       isActive: true
     };
-    const idData = await this.apiClientService.create(apiClient);
-    return { ...apiClient, clientSecret };
+    const idData = await this.apiClientService.create(projectKey, apiClient);
+    return { ...apiClient, clientSecret, projectKey };
   }
 
   async createApiToken(
@@ -120,7 +121,9 @@ export class AuthService implements IAuthService {
     clientId: string,
     incommingClientSecret: string
   ): Promise<ApiClientResponse | null> {
-    const apiClient = await this.apiClientService.findByClientId(clientId);
+    const projectKey = this.cls.get(PROJECT)?.key;
+    if (!projectKey) return;
+    const apiClient = await this.apiClientService.findByClientId(projectKey, clientId);
     if (!apiClient || !apiClient.isActive) return;
     const validSecret = await bcrypt.compare(incommingClientSecret, apiClient.clientSecret);
     if (!validSecret) return;

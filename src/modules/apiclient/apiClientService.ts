@@ -4,7 +4,7 @@ import { BadRequestException, Inject, Injectable, UnauthorizedException } from '
 import { ApiClientId, ApiClientModel } from './apiClientModel';
 import { CreateApiClientBody, IApiClientService } from './apiClientService.interface';
 import { _IApiClientRepository, IApiClientRepository } from './apiClientRepository.interface';
-import { IDWithVersion } from 'src/appModule.interfaces';
+import { IDWithVersion, ProjectKey } from 'src/appModule.interfaces';
 import { PROJECT, USER } from '../auth/authService';
 import { ClsService } from 'nestjs-cls';
 import { _IProjectService, IProjectService } from '../project/projectService.interface';
@@ -22,24 +22,26 @@ export class ApiClientService implements IApiClientService {
   ) {}
 
   // CREATE
-  async create(data: CreateApiClientBody): Promise<IDWithVersion> {
-    const projectKey = this.cls.get(PROJECT).key;
-    const userId = this.cls.get(USER).id;
+  async create(projectKey: ProjectKey, data: CreateApiClientBody): Promise<IDWithVersion> {
     const project = await this.projectService.findByKey(projectKey);
     if (!project) throw new ProjectNotFoundException();
+    const userId = this.cls.get(USER).id;
     if (project.ownerId !== userId) throw new UnauthorizedException();
     const id = nanoid();
     const result = await this.repository.create({
       id,
-      ...data
+      ...data,
+      projectKey
     });
     if (result.isErr()) throw new BadRequestException(result.error);
     return result.value;
   }
 
   // FIND BY CLIENTID
-  async findByClientId(clientId: ApiClientId): Promise<ApiClientModel | null> {
-    const projectKey = this.cls.get(PROJECT).key;
+  async findByClientId(
+    projectKey: ProjectKey,
+    clientId: ApiClientId
+  ): Promise<ApiClientModel | null> {
     const project = await this.projectService.findByKey(projectKey);
     if (!project) throw new ProjectNotFoundException();
     const userId = this.cls.get(USER)?.id ?? null;

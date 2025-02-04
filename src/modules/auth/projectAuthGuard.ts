@@ -17,9 +17,11 @@ export class ProjectAuthGuard extends AuthGuard('project') {
 
     // Check project claim
     const user = this.cls.get(USER);
-    const claimProjectId = user.claims.find((s) => s.split(':')[0] === PROJECT_TAG);
-    if (!claimProjectId || projectKey !== claimProjectId.split(':')[1]) {
-      throw new UnauthorizedException('Invalid project');
+    if (user) {
+      const claimProjectId = user.claims.find((s) => s.split(':')[0] === PROJECT_TAG);
+      if (!claimProjectId || projectKey !== claimProjectId.split(':')[1]) {
+        throw new UnauthorizedException('Invalid project');
+      }
     }
 
     // Set project

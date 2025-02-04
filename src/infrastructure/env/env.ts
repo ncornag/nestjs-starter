@@ -13,6 +13,7 @@ export const envSchema = Type.Object({
   API_HOST: Type.String(),
   API_PORT: Type.Number(),
   MONGO_URL: Type.String(),
+  MAIN_DB: Type.String({ default: 'ecomm-nestjs' }),
   TOKEN_ISS: Type.String({ default: 'ecomm-starter' }),
   TOKEN_AUD: Type.String({ default: 'ecomm-auth' }),
   TOKEN_EXP: Type.Number(),

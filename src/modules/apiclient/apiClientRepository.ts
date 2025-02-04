@@ -6,6 +6,7 @@ import { Err, Ok, Result } from 'ts-results-es';
 import { IDWithVersion } from 'src/appModule.interfaces';
 import { type DbEntity, toEntity, toDbEntity } from 'src/infrastructure/db/dbModule';
 import { DbService } from 'src/infrastructure/db/dbService';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class ApiClientRepository implements IApiClientRepository {
@@ -13,11 +14,14 @@ export class ApiClientRepository implements IApiClientRepository {
 
   constructor(
     @Inject('DbService')
-    private db: DbService
+    private db: DbService,
+    private configService: ConfigService
   ) {}
 
   public async onModuleInit() {
-    this.col = this.db.getDb().collection<DbEntity<ApiClientModel>>('apiClients');
+    this.col = this.db
+      .getDb(this.configService.get<string>('MAIN_DB'))
+      .collection<DbEntity<ApiClientModel>>('apiClients');
   }
 
   // CREATE

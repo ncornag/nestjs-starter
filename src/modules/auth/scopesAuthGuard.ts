@@ -21,19 +21,14 @@ export const AllowScopes = (scopes: string[] | string): Type<CanActivate> => {
     }
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
-      try {
-        // Check reminder claims (roles, scopes)
-        if (!this.routeExpectedClaims || !this.routeExpectedClaims.length) {
-          throw new UnauthorizedException('Insufficient privileges');
-        }
-        if (this.routeExpectedClaims.find((s) => s === PUBLIC_ACCESS) !== undefined)
-          return true;
-        const user = this.cls.get(USER);
-        if (!this.routeExpectedClaims.every((item: string) => user.claims.includes(item))) {
-          throw new UnauthorizedException('Insufficient privileges');
-        }
-      } catch {
-        throw new UnauthorizedException();
+      // Check reminder claims (roles, scopes)
+      if (!this.routeExpectedClaims || !this.routeExpectedClaims.length) {
+        throw new UnauthorizedException('Insufficient privileges');
+      }
+      if (this.routeExpectedClaims.find((s) => s === PUBLIC_ACCESS) !== undefined) return true;
+      const user = this.cls.get(USER);
+      if (!this.routeExpectedClaims.every((item: string) => user.claims.includes(item))) {
+        throw new UnauthorizedException('Insufficient privileges');
       }
       return true;
     }

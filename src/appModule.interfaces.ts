@@ -31,12 +31,27 @@ export interface IService<T, C, U> {
   delete: (id: ID, version: Version) => Promise<void>;
 }
 
+// CATALOG AWARE SERVICE
+export interface IAwareCatalogService<T, C, U> {
+  create: (catalogId: ID, data: C) => Promise<IDWithVersion>;
+  findById: (catalogId: ID, id: ID) => Promise<T>;
+  update: (catalogId: ID, id: ID, version: Version, data: U) => Promise<T>;
+  delete: (catalogId: ID, id: ID, version: Version) => Promise<void>;
+}
+
 // GENERIC REPOSITORY
 export interface IRepository<T> {
   create(input: T): Promise<Result<IDWithVersion, Error>>;
   find(where: any): Promise<Result<T[] | undefined, Error>>;
   updateOne(where: any, input: Partial<T>): Promise<Result<T, Error>>;
   deleteOne(where: any): Promise<Result<void, Error>>;
+}
+// CATALOG AWARE REPOSITORY
+export interface ICatalogAwareRepository<T> {
+  create(catalogId: ID, input: T): Promise<Result<IDWithVersion, Error>>;
+  find(catalogId: ID, where: any): Promise<Result<T[] | undefined, Error>>;
+  updateOne(catalogId: ID, where: any, input: Partial<T>): Promise<Result<T, Error>>;
+  deleteOne(catalogId: ID, where: any): Promise<Result<void, Error>>;
 }
 
 // PROJECT BASED PARAMS

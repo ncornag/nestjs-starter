@@ -8,6 +8,7 @@ import { type DbEntity, toEntity, toDbEntity } from 'src/infrastructure/db/dbMod
 import { mongoDiff } from 'src/infrastructure/db/mongoDiff';
 import { DbService } from 'src/infrastructure/db/dbService';
 import { ProjectNotFoundException } from './projectExceptions';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class ProjectRepository implements IProjectRepository {
@@ -15,11 +16,14 @@ export class ProjectRepository implements IProjectRepository {
 
   constructor(
     @Inject('DbService')
-    private db: DbService
+    private db: DbService,
+    private configService: ConfigService
   ) {}
 
   public async onModuleInit() {
-    this.col = this.db.getDb().collection<DbEntity<ProjectModel>>('projects');
+    this.col = this.db
+      .getDb(this.configService.get<string>('MAIN_DB'))
+      .collection<DbEntity<ProjectModel>>('projects');
   }
 
   // CREATE

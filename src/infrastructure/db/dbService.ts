@@ -1,16 +1,13 @@
-import {
-  Injectable,
-  OnApplicationBootstrap,
-  OnApplicationShutdown,
-  OnModuleInit
-} from '@nestjs/common';
+import { Inject, Injectable, OnApplicationShutdown, OnModuleInit, Scope } from '@nestjs/common';
 import { EnvService } from 'src/infrastructure/env/envService';
 import { PinoLogger } from 'nestjs-pino';
 import { green, yellow, bold } from 'kolorist';
 import { Collection, Db, MongoClient } from 'mongodb';
-import { ID } from 'src/appModule.interfaces';
 import { IDbService } from './dbService.interface';
-import { NestFastifyApplication } from '@nestjs/platform-fastify';
+import { ClsService } from 'nestjs-cls';
+import { PROJECT } from 'src/modules/auth/authService';
+import { ProjectKey } from 'src/appModule.interfaces';
+import { REQUEST } from '@nestjs/core';
 
 @Injectable()
 export class DbService implements OnModuleInit, OnApplicationShutdown {
@@ -29,7 +26,8 @@ export class DbService implements OnModuleInit, OnApplicationShutdown {
 
   constructor(
     private readonly config: EnvService,
-    private readonly logger: PinoLogger
+    private readonly logger: PinoLogger,
+    private readonly cls: ClsService
   ) {}
 
   async start(): Promise<IDbService> {
@@ -137,7 +135,10 @@ export class DbService implements OnModuleInit, OnApplicationShutdown {
     `${entity}${catalogId ? `_${catalogId}` : ''}`;
 
   public getDb = (dbId?: string): Db => {
-    if (!dbId) return this.client.db();
+    if (!dbId) {
+      dbId = this.cls.get(PROJECT)?.key;
+      if (!dbId) throw new Error('Project key not found');
+    }
     const db = this.dbs.get(dbId);
     if (db) return db;
     const newDb = this.client.db(dbId);

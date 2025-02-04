@@ -6,31 +6,32 @@ import {
   Controller,
   Inject,
   Res,
+  Request,
   UseGuards,
-  Param,
-  UseInterceptors
+  HttpStatus,
+  Req
 } from '@nestjs/common';
 import { Validate } from 'nestjs-typebox';
-import {
-  _IProjectService,
-  IProjectService as IProductService,
-  CreateProjectBodySchema,
-  CreateProjectBody,
-  UpdateProjectBodySchema,
-  UpdateProjectBody
-} from '../project/projectService.interface';
-import { ProjectModel, ProjectModelSchema } from '../project/projectModel';
 import {
   idSchema,
   ID,
   projectKeySchema,
   ProjectKey,
   IDWithVersionSchema,
-  IDWithVersion
+  IDWithVersion,
+  versionSchema,
+  Version
 } from 'src/appModule.interfaces';
 import { AllowScopes, PUBLIC_ACCESS } from 'src/modules/auth/scopesAuthGuard';
 import { JwtAuthGuard } from '../auth/jwtAuthGuard';
-import { _IProductService } from './productService.interface';
+import {
+  _IProductService,
+  CreateProductBody,
+  CreateProductBodySchema,
+  IProductService,
+  UpdateProductBody,
+  UpdateProductBodySchema
+} from './productService.interface';
 import { ProductModel, ProductModelSchema } from './productModel';
 import { ProjectAuthGuard } from '../auth/projectAuthGuard';
 
@@ -43,29 +44,25 @@ export class ProductController {
     private readonly service: IProductService
   ) {}
 
-  // @UseGuards(AllowScopes('catalog:write'))
   @Post()
+  @UseGuards(AllowScopes('catalog:write'))
   @Validate({
     response: IDWithVersionSchema,
     request: [
-      {
-        name: 'projectKey',
-        type: 'param',
-        schema: projectKeySchema
-      },
-      {
-        type: 'body',
-        schema: CreateProjectBodySchema
-      }
+      { name: 'projectKey', type: 'param', schema: projectKeySchema },
+      { name: 'catalogId', type: 'query', schema: idSchema },
+      { type: 'body', schema: CreateProductBodySchema }
     ]
   })
   async create(
     projectKey: ProjectKey,
-    data: CreateProjectBody,
+    catalogId: ID,
+    data: CreateProductBody,
     @Res({ passthrough: true }) res
   ): Promise<IDWithVersion> {
-    const idData = await this.service.create(data);
-    res.status(201);
+    const idData = await this.service.create(catalogId, data);
+
+    res.status(HttpStatus.CREATED);
     return idData;
   }
 
@@ -75,66 +72,58 @@ export class ProductController {
   @Validate({
     response: ProductModelSchema,
     request: [
-      {
-        name: 'projectKey',
-        type: 'param',
-        schema: projectKeySchema
-      },
-      {
-        name: 'id',
-        type: 'param',
-        schema: idSchema
-      }
+      { name: 'projectKey', type: 'param', schema: projectKeySchema },
+      { name: 'catalogId', type: 'query', schema: idSchema },
+      { name: 'id', type: 'param', schema: idSchema }
     ]
   })
-  async get(projectKey: ProjectKey, id: ID): Promise<ProductModel> {
-    return (await this.service.findById(id)) as unknown as ProductModel;
+  async get(projectKey: ProjectKey, catalogId: ID, id: ID): Promise<ProductModel> {
+    return (await this.service.findById(catalogId, id)) as unknown as ProductModel;
   }
 
   // UPDATE
   @Patch(':id')
+  @UseGuards(AllowScopes('catalog:write'))
   @Validate({
-    response: ProjectModelSchema,
+    response: ProductModelSchema,
     request: [
-      {
-        name: 'projectKey',
-        type: 'param',
-        schema: projectKeySchema
-      },
-      {
-        name: 'id',
-        type: 'param',
-        schema: idSchema
-      },
-      {
-        type: 'body',
-        schema: UpdateProjectBodySchema
-      }
+      { name: 'projectKey', type: 'param', schema: projectKeySchema },
+      { name: 'catalogId', type: 'query', schema: idSchema },
+      { name: 'id', type: 'param', schema: idSchema },
+      { name: 'version', type: 'query', schema: versionSchema },
+      { type: 'body', schema: UpdateProductBodySchema }
     ]
   })
-  async update(projectKey: ProjectKey, id: ID, data: UpdateProjectBody): Promise<ProjectModel> {
-    return await this.service.update(id, 0, data);
+  async update(
+    projectKey: ProjectKey,
+    catalogId: ID,
+    id: ID,
+    version: Version,
+    data: UpdateProductBody
+  ): Promise<ProductModel> {
+    return await this.service.update(catalogId, id, version, data);
   }
 
   // DELETE
   @Delete(':id')
+  @UseGuards(AllowScopes('catalog:write'))
   @Validate({
     request: [
-      {
-        name: 'projectKey',
-        type: 'param',
-        schema: projectKeySchema
-      },
-      {
-        name: 'id',
-        type: 'param',
-        schema: idSchema
-      }
+      { name: 'projectKey', type: 'param', schema: projectKeySchema },
+      { name: 'catalogId', type: 'query', schema: idSchema },
+      { name: 'id', type: 'param', schema: idSchema },
+      { name: 'version', type: 'query', schema: versionSchema }
     ]
   })
-  async delete(projectKey: ProjectKey, id: ID, @Res({ passthrough: true }) res): Promise<void> {
-    await this.service.delete(id, 0);
-    res.status(204);
+  async delete(
+    projectKey: ProjectKey,
+    catalogId: ID,
+    id: ID,
+    version: Version,
+    @Res({ passthrough: true }) res
+  ): Promise<void> {
+    await this.service.delete(catalogId, id, version);
+    res.status(HttpStatus.NO_CONTENT);
     return;
   }
 }

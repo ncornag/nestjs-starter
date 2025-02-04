@@ -1,7 +1,7 @@
 import { Type, type Static } from '@sinclair/typebox';
 import { ApiClientModelSchema } from '../apiclient/apiclientModel';
 import { CreateUserBody } from '../user/userService.interface';
-import { IDWithVersion } from 'src/appModule.interfaces';
+import { IDWithVersion, ProjectKey } from 'src/appModule.interfaces';
 
 export const _IAuthService = 'IAuthService';
 
@@ -19,7 +19,7 @@ export type ApiClientResponse = Static<typeof ApiClientResponseSchema>;
 // CREATE
 export const CreateApiClientBodySchema = Type.Omit(
   ApiClientModelSchema,
-  ['id', 'clientId', 'clientSecret', 'isActive'],
+  ['id', 'clientId', 'clientSecret', 'isActive', 'projectKey'],
   {
     additionalProperties: false
   }
@@ -31,7 +31,10 @@ export interface IAuthService {
   validateUser(username: string, incommingPassword: string): Promise<any | null>;
   signUp(data: CreateUserBody): Promise<IDWithVersion>;
   login(user: any): Promise<{ access_token: string }>;
-  createApiClient(data: CreateApiClientBody): Promise<ApiClientCreateResponse>;
+  createApiClient(
+    projectKey: ProjectKey,
+    data: CreateApiClientBody
+  ): Promise<ApiClientCreateResponse>;
   validateApiClient(
     clientId: string,
     incommingClientSecret: string

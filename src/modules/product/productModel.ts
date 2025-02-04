@@ -34,7 +34,6 @@ export const ProductType = {
 export const ProductModelSchema = Type.Object(
   {
     id: Type.String(),
-    catalogId: Type.String(),
     name: i18nKeyType,
     description: Type.Optional(i18nKeyType),
     sku: Type.Optional(Type.String()), // Optional in the base product

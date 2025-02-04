@@ -1,6 +1,6 @@
 import { Type, type Static } from '@sinclair/typebox';
 import { ApiClientModel, ApiClientModelSchema } from './apiclientModel';
-import { IDWithVersion } from 'src/appModule.interfaces';
+import { IDWithVersion, ProjectKey } from 'src/appModule.interfaces';
 
 export const _IApiClientService = 'IApiClientService';
 
@@ -12,6 +12,6 @@ export type CreateApiClientBody = Static<typeof CreateApiClientBodySchema>;
 
 // INTERFACE
 export interface IApiClientService {
-  create(data: CreateApiClientBody): Promise<IDWithVersion>;
-  findByClientId(clientId: string): Promise<ApiClientModel | null>;
+  create(projectKey: ProjectKey, data: CreateApiClientBody): Promise<IDWithVersion>;
+  findByClientId(projectKey: ProjectKey, clientId: string): Promise<ApiClientModel | null>;
 }
